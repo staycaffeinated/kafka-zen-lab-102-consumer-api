@@ -1,0 +1,119 @@
+plugins {
+    id 'buildlogic.application-conventions'
+    id 'buildlogic.integration-test'
+    id 'jacoco-report-aggregation'
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.dependency.management)
+    alias(libs.plugins.versions)
+    alias(libs.plugins.lombok.plugin)
+}
+
+version='0.0.1'
+
+
+// --------------------------------------------------------------------------------
+// Dependencies
+// --------------------------------------------------------------------------------
+dependencies {
+    // enable Mockito Java Agents
+    mockitoAgent("org.mockito:mockito-core") { transitive = false }
+
+    annotationProcessor libs.spring.boot.config.processor
+
+    developmentOnly libs.spring.devtools
+
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.spring.boot.starter.actuator
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.validation
+    implementation libs.jakarta.persistence.api
+    implementation libs.spring.boot.starter.hateoas
+    implementation libs.rsql.jpa.spring.boot.starter
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+    implementation libs.swagger.annotations
+    implementation libs.openapi.starter.webmvc.ui
+    implementation libs.spring.boot.starter.kafka
+    implementation libs.apache.kafka.streams
+    implementation libs.jackson.datatype.jsr310
+
+    // Optional: This reports out-of-date property names
+    runtimeOnly libs.spring.boot.properties.migrator
+
+    runtimeOnly libs.h2
+
+    testImplementation libs.assertJ
+    testImplementation libs.datafaker
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.junit.jupiter
+    testImplementation libs.spring.boot.starter.webmvc.test
+    testImplementation libs.spring.boot.starter.data.jpa.test
+    testImplementation libs.spring.boot.starter.jdbc.test
+    testImplementation libs.spring.boot.test.autoconfigure
+    testImplementation libs.spring.kafka.test
+    testImplementation libs.apache.kafka.streams.test.utils
+
+    testRuntimeOnly libs.h2
+    testFixturesImplementation libs.jakarta.persistence.api
+    testFixturesImplementation libs.datafaker
+}
+// --------------------------------------------------------------------------------
+// Jib specific configuration for this application
+// --------------------------------------------------------------------------------
+jib {
+    dockerClient {
+        executable = project.findProperty('dockerExecutable') ?: '/usr/local/bin/docker'
+    }
+    from {
+        // Any java version compatible with Spring Boot 4.x should work
+        // To run on Windows use, for example: 'eclipse-temurin:21-jre-windowsservercore'
+        image = 'eclipse-temurin:21-jre-jammy'
+        platforms {
+            platform {
+                os = 'linux'
+                architecture = 'arm64'
+           }
+           platform {
+                os = 'linux'
+                architecture = 'amd64'
+           }
+        }
+    }
+    to {
+        image = 'kafka-zen-lab-102-consumer-api'
+        tags = [ 'latest', version ]
+    }
+    container {
+        format = 'OCI'
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectName", "kafka-zen-lab-102-consumer-api"
+        property "sonar.projectKey", "kafka-zen-lab-102-consumer-api"
+        property "sonar.gradle.skipCompile", "true"
+    }
+}
+
+/*
+ * This task dependency is defined per module (subproject) since it cannot
+ * be guaranteed that all modules of this application will have integration tests.
+ * Thus, for any module that does not contain integration tests
+ * (i.e., there's no `src/integrationTest/` folder), simply
+ * remove the dependency on `integrationTestCodeCoverageReport`.
+ */
+tasks.named('check') {
+    dependsOn tasks.named('integrationTestCodeCoverageReport')
+    dependsOn tasks.named('testCodeCoverageReport')
+}
+
+// --------------------------------------------------------------------------------
+// Enable Mockito's Agent
+// --------------------------------------------------------------------------------
+tasks.withType(Test).configureEach {
+    doFirst {
+        jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
+    }
+}
