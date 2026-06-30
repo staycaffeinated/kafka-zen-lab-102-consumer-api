@@ -1,6 +1,5 @@
 package zen.lab.consumer.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Set;
@@ -15,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Product {
 
     private String productId;
