@@ -1,17 +1,21 @@
 package zen.lab.consumer.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Set;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
+@SuperBuilder
 @Getter
 @ToString
 @EqualsAndHashCode
-@Builder
+@NoArgsConstructor
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Product {
 
     private String productId;
@@ -23,7 +27,7 @@ public class Product {
     private String brand;
     private BigDecimal price;
     private String priceCurrency;
-    private boolean isInStock;
+    private boolean inStock;
     private Long inventoryCount;
     private BigDecimal ratingAverage;
     private BigInteger ratingCount;

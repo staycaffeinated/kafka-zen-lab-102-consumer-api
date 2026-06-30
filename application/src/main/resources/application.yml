@@ -97,44 +97,19 @@ spring:
     consumer:
       auto-commit-interval: "1s"
       bootstrap-servers: "${spring.kafka.bootstrap-servers}"
-      client-id: "default-client-id"
+      client-id: "${spring.application.name}"
       enable-auto-commit: true
       group-id: "${spring.application.name}"
       key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
-      value-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
-    producer:
-      bootstrap-servers: "${spring.kafka.bootstrap-servers}"
-      key-serializer: "org.apache.kafka.common.serialization.StringSerializer"
-      value-serializer: "org.apache.kafka.common.serialization.StringSerializer"
+      value-deserializer: "org.springframework.kafka.support.serializer.JsonDeserializer"
       properties:
-        acks: "all"
-        retries: 10
-        retry.backoff.ms: "1000"
+        spring.json.trusted.packages: "zen.lab.*"
+        spring.json.value.default.type: "zen.lab.consumer.domain.events.ClickEvent"
     listener:
       ack-count: 3
       client-id: "${spring.application.name}"
-      concurrency: 2
+      concurrency: 5
       missing-topics-fatal: false
-    #
-    # Kafka Streams. Remove this stanza if it doesn't apply to your project.
-    #
-    streams:
-      application-id: "${spring.application.name}"
-      # This is optional if `spring.kafka.bootstrap-servers` is configured.
-      bootstrap-servers: ${spring.kafka.bootstrap-servers}
-      properties:
-        default:
-          key:
-            serde: 'org.apache.kafka.common.serialization.Serdes$StringSerde'
-          value:
-            serde: 'org.apache.kafka.common.serialization.Serdes$StringSerde'
-          deserialization:
-            exception:
-              handler: 'org.apache.kafka.streams.errors.LogAndContinueExceptionHandler'
-          serialization:
-            exception:
-              handler: 'org.apache.kafka.streams.errors.LogAndContinueExceptionHandler'
-
 
 # -------------------------------------------------------------------------
 # Logging

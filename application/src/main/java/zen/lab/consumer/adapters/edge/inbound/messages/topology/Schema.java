@@ -13,24 +13,14 @@ package zen.lab.consumer.adapters.edge.inbound.messages.topology;
 })
 public class Schema {
 
-    public static final String[] ALL_TOPICS = {Topics.ITEM_CREATED, Topics.ITEM_VALIDATED, Topics.ITEM_DLQ};
+    public static final String[] ALL_TOPICS = {Topics.CLICK_EVENT_DLQ, Topics.CLICK_EVENT_RECEIVED};
 
     // These are the example topics. Change these to match your application.
     public static class Topics {
-        public static final String ITEM_CREATED = "example-app.items.created";
-        public static final String ITEM_VALIDATED = "example-app.items.validated";
-        public static final String ITEM_DLQ = "example-app.items.dlq";
+        public static final String CLICK_EVENT_RECEIVED = "kafka-zen.lab-101.traffic-simulator.click-event.received";
+        public static final String CLICK_EVENT_DLQ = "kafka-zen.lab-101.traffic-simulator.click-event.received.dlq";
 
         private Topics() {
-            // sealed
-        }
-    }
-
-    // These are the state stores used by the application.
-    public static class Stores {
-        public static final String ITEMS_STORE = "example-app.items.store";
-
-        private Stores() {
             // sealed
         }
     }
