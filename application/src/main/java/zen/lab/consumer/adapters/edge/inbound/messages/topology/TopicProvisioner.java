@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.errors.TopicExistsException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -31,7 +30,6 @@ public class TopicProvisioner {
 
     private final KafkaAdmin kafkaAdmin;
 
-    @Autowired
     public TopicProvisioner(KafkaAdmin kafkaAdmin) {
         this.kafkaAdmin = kafkaAdmin;
     }
