@@ -72,7 +72,8 @@ class ContextMessageTest {
 
         @Test
         void deserializesAllFieldsFromJson() throws Exception {
-            String json = """
+            String json =
+                    """
                     {
                       "pageId": "%s",
                       "position": %d,
@@ -80,7 +81,8 @@ class ContextMessageTest {
                       "referrer": "%s",
                       "searchQuery": "%s"
                     }
-                    """.formatted(PAGE_ID, POSITION, SOURCE, REFERRER, SEARCH_QUERY);
+                    """
+                            .formatted(PAGE_ID, POSITION, SOURCE, REFERRER, SEARCH_QUERY);
 
             ContextMessage msg = jsonMapper.readValue(json, ContextMessage.class);
 
@@ -93,11 +95,13 @@ class ContextMessageTest {
 
         @Test
         void deserializesPartialJsonWithNullsForMissingFields() throws Exception {
-            String json = """
+            String json =
+                    """
                     {
                       "pageId": "%s"
                     }
-                    """.formatted(PAGE_ID);
+                    """
+                            .formatted(PAGE_ID);
 
             ContextMessage msg = jsonMapper.readValue(json, ContextMessage.class);
 

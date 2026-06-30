@@ -75,9 +75,21 @@ class ProductMessageTest {
         @Test
         void allArgsConstructorSetsAllFields() {
             ProductMessage msg = new ProductMessage(
-                    PRODUCT_ID, SKU, NAME, SLUG, CATEGORY, SUB_CATEGORY, BRAND,
-                    PRICE, PRICE_CURRENCY, IN_STOCK, INVENTORY_COUNT,
-                    RATING_AVERAGE, RATING_COUNT, TAGS, IMAGE_URL);
+                    PRODUCT_ID,
+                    SKU,
+                    NAME,
+                    SLUG,
+                    CATEGORY,
+                    SUB_CATEGORY,
+                    BRAND,
+                    PRICE,
+                    PRICE_CURRENCY,
+                    IN_STOCK,
+                    INVENTORY_COUNT,
+                    RATING_AVERAGE,
+                    RATING_COUNT,
+                    TAGS,
+                    IMAGE_URL);
 
             assertThat(msg.getProductId()).isEqualTo(PRODUCT_ID);
             assertThat(msg.getSku()).isEqualTo(SKU);
@@ -131,10 +143,8 @@ class ProductMessageTest {
         @Test
         void differentProductIdNotEqual() {
             ProductMessage a = fullProduct();
-            ProductMessage b = ProductMessage.builder()
-                    .productId("other-id")
-                    .sku(SKU)
-                    .build();
+            ProductMessage b =
+                    ProductMessage.builder().productId("other-id").sku(SKU).build();
 
             assertThat(a).isNotEqualTo(b);
         }
@@ -174,7 +184,8 @@ class ProductMessageTest {
 
         @Test
         void deserializesAllFieldsFromJson() throws Exception {
-            String json = """
+            String json =
+                    """
                     {
                       "productId": "%s",
                       "sku": "%s",
@@ -192,8 +203,17 @@ class ProductMessageTest {
                       "tags": ["sale", "new-arrival"],
                       "imageUrl": "%s"
                     }
-                    """.formatted(PRODUCT_ID, SKU, NAME, SLUG, CATEGORY, SUB_CATEGORY,
-                    BRAND, PRICE_CURRENCY, IMAGE_URL);
+                    """
+                            .formatted(
+                                    PRODUCT_ID,
+                                    SKU,
+                                    NAME,
+                                    SLUG,
+                                    CATEGORY,
+                                    SUB_CATEGORY,
+                                    BRAND,
+                                    PRICE_CURRENCY,
+                                    IMAGE_URL);
 
             ProductMessage msg = jsonMapper.readValue(json, ProductMessage.class);
 
@@ -218,12 +238,14 @@ class ProductMessageTest {
 
         @Test
         void deserializesPartialJsonWithNullsForMissingFields() throws Exception {
-            String json = """
+            String json =
+                    """
                     {
                       "productId": "%s",
                       "sku": "%s"
                     }
-                    """.formatted(PRODUCT_ID, SKU);
+                    """
+                            .formatted(PRODUCT_ID, SKU);
 
             ProductMessage msg = jsonMapper.readValue(json, ProductMessage.class);
 
