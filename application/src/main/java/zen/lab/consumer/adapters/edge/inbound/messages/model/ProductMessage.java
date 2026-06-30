@@ -35,10 +35,21 @@ public class ProductMessage {
     private String imageUrl;
 
     public ProductMessage(
-            String productId, String sku, String name, String slug, String category,
-            String subCategory, String brand, BigDecimal price, String priceCurrency,
-            boolean inStock, Long inventoryCount, BigDecimal ratingAverage,
-            BigInteger ratingCount, Set<String> tags, String imageUrl) {
+            String productId,
+            String sku,
+            String name,
+            String slug,
+            String category,
+            String subCategory,
+            String brand,
+            BigDecimal price,
+            String priceCurrency,
+            boolean inStock,
+            Long inventoryCount,
+            BigDecimal ratingAverage,
+            BigInteger ratingCount,
+            Set<String> tags,
+            String imageUrl) {
         this.productId = productId;
         this.sku = sku;
         this.name = name;
