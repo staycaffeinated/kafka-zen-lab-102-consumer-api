@@ -33,7 +33,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.databind.json.JsonMapper;
-import zen.lab.consumer.common.exceptions.UnprocessableEntityException;
+import zen.lab.consumer.infrastructure.exceptions.UnprocessableEntityException;
 
 /**
  * Unit tests of GlobalExceptionHandler

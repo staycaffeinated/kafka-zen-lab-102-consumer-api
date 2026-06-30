@@ -6,6 +6,7 @@ package zen.lab.consumer.infrastructure.advice;
 import jakarta.validation.ConstraintViolation;
 import java.sql.SQLException;
 import java.util.Set;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import zen.lab.consumer.common.exceptions.UnprocessableEntityException;
+import zen.lab.consumer.infrastructure.exceptions.UnprocessableEntityException;
 
 /**
  * Handles turning exceptions into RFC-7807 problem/json responses,
@@ -151,7 +152,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return the ApiError object
      */
     @Override
-    protected ResponseEntity<Object> handleMissingServletRequestParameter(
+    protected ResponseEntity<@NonNull Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex,
             HttpHeaders headers,
             HttpStatusCode status,
