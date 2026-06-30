@@ -16,6 +16,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @NoArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@SuppressWarnings({"java:S107" // yes, builder has 7+ methods; class has 15 instance variables
+})
 public class ProductMessage {
 
     private String productId;

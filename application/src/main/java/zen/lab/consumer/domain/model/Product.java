@@ -14,6 +14,8 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor
+@SuppressWarnings({"java:S107 " // yes, builder has more than 7 methods.
+})
 public class Product {
 
     private String productId;

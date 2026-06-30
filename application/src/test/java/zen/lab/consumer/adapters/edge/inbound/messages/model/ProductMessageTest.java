@@ -136,8 +136,7 @@ class ProductMessageTest {
             ProductMessage a = fullProduct();
             ProductMessage b = fullProduct();
 
-            assertThat(a).isEqualTo(b);
-            assertThat(a.hashCode()).isEqualTo(b.hashCode());
+            assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
         }
 
         @Test
