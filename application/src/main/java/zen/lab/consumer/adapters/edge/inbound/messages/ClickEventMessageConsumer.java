@@ -5,8 +5,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import zen.lab.consumer.adapters.edge.inbound.messages.model.ClickEventMessage;
-import zen.lab.consumer.infrastructure.kafka.Schema;
 import zen.lab.consumer.application.port.in.MessageConsumerUseCase;
+import zen.lab.consumer.infrastructure.kafka.Schema;
 
 @Component
 @RequiredArgsConstructor

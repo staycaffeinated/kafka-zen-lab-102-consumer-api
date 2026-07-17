@@ -8,7 +8,6 @@ import static zen.lab.consumer.infrastructure.profiles.SpringProfiles.INTEGRATIO
 import static zen.lab.consumer.infrastructure.profiles.SpringProfiles.TEST;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,7 +17,6 @@ import tools.jackson.databind.json.JsonMapper;
 @ActiveProfiles({TEST, INTEGRATION_TEST})
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class AbstractIntegrationTest {
     @Autowired
     protected MockMvc mockMvc;

@@ -9,10 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import zen.lab.consumer.adapters.edge.outbound.persistence.RegisterDatabaseProperties;
 
 @SpringBootTest
-class ApplicationIntegrationTest implements RegisterDatabaseProperties {
+class ApplicationIntegrationTest {
 
     @Autowired
     ApplicationContext context;

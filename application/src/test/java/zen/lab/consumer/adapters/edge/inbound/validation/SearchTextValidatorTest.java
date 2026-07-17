@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import zen.lab.consumer.adapters.edge.inbound.validation.SearchTextValidator;
 
 /**
  * Unit tests of SearchTextValidator

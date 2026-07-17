@@ -25,11 +25,9 @@ dependencies {
     implementation libs.spring.boot.autoconfigure
     implementation libs.spring.boot.starter.actuator
     implementation libs.spring.boot.starter.web
-    implementation libs.spring.boot.starter.data.jpa
     implementation libs.spring.boot.starter.validation
     implementation libs.jakarta.persistence.api
     implementation libs.spring.boot.starter.hateoas
-    implementation libs.rsql.jpa.spring.boot.starter
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.swagger.annotations
@@ -41,21 +39,15 @@ dependencies {
     // Optional: This reports out-of-date property names
     runtimeOnly libs.spring.boot.properties.migrator
 
-    runtimeOnly libs.h2
-
     testImplementation libs.assertJ
     testImplementation libs.datafaker
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.junit.jupiter
     testImplementation libs.spring.boot.starter.webmvc.test
-    testImplementation libs.spring.boot.starter.data.jpa.test
-    testImplementation libs.spring.boot.starter.jdbc.test
     testImplementation libs.spring.boot.test.autoconfigure
     testImplementation libs.spring.kafka.test
     testImplementation libs.apache.kafka.streams.test.utils
 
-    testRuntimeOnly libs.h2
-    testFixturesImplementation libs.jakarta.persistence.api
     testFixturesImplementation libs.datafaker
 }
 // --------------------------------------------------------------------------------

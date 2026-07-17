@@ -55,41 +55,6 @@ spring:
     deserialization:
       fail_on_unknown_properties: false
 
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        id:
-          new_generator_mappings: false
-
-  datasource:
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    url: ${DB_URL}
-    # -------------------------------------------------------------------------------------------
-    # Hikari connection pool properties. See: https://github.com/brettwooldridge/HikariCP
-    # -------------------------------------------------------------------------------------------
-    hikari:
-      connection-timeout: "2000"
-      maximum-pool-size: 20
-      minimum-idle: 2
-      pool-name: "springboot-hikari-cp"
-      max-lifetime: 1000000
-      data-source-properties:
-        cachePrepStmts: true
-        # Size of the prepared statement cache
-        prepStmtCacheSize: 250
-        # Maximum length of a statement the driver will cache
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-        useLocalSessionState: true
-        rewriteBatchStatements: true
-        cacheResultsSetMetadata: true
-        cacheServerConfiguration: true
-        elideSetAutoCommits: true
-        maintainTimeStats: false
-
-
   # -------------------------------------------------------------------------------------------
   # Kafka
   # -------------------------------------------------------------------------------------------
