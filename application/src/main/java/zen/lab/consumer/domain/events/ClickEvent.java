@@ -20,5 +20,4 @@ public abstract sealed class ClickEvent permits ProductViewedEvent, ProductAdded
     private String userId;
     private String sessionId;
     private String correlationId;
-    private String partitionKey;
 }

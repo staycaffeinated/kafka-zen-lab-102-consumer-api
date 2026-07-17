@@ -104,7 +104,6 @@ class ClickEventMessageMapperTest {
             assertThat(result.getUserId()).isEqualTo(USER_ID);
             assertThat(result.getSessionId()).isEqualTo(SESSION_ID);
             assertThat(result.getCorrelationId()).isEqualTo(CORRELATION_ID);
-            assertThat(result.getPartitionKey()).isEqualTo(PARTITION_KEY);
         }
 
         @Test

@@ -30,7 +30,6 @@ public class ClickEventMessageMapper {
                 .userId(message.getUserId())
                 .sessionId(message.getSessionId())
                 .correlationId(message.getCorrelationId())
-                .partitionKey(message.getPartitionKey())
                 .product(toProduct(message.getProduct()))
                 .context(toContext(message.getContext()))
                 .build();
@@ -44,7 +43,6 @@ public class ClickEventMessageMapper {
                 .userId(message.getUserId())
                 .sessionId(message.getSessionId())
                 .correlationId(message.getCorrelationId())
-                .partitionKey(message.getPartitionKey())
                 .productId(message.getProductId())
                 .metadata(message.getMetadata())
                 .build();

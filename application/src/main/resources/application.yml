@@ -63,10 +63,9 @@ spring:
           new_generator_mappings: false
 
   datasource:
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:secret}
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:kafka-zen-lab-102-consumer-api;DATABASE_TO_UPPER=false
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
     # -------------------------------------------------------------------------------------------
     # Hikari connection pool properties. See: https://github.com/brettwooldridge/HikariCP
     # -------------------------------------------------------------------------------------------
@@ -97,10 +96,9 @@ spring:
   kafka:
     bootstrap-servers: "localhost:9092"
     consumer:
-      auto-commit-interval: "1s"
       bootstrap-servers: "${spring.kafka.bootstrap-servers}"
       client-id: "${spring.application.name}"
-      enable-auto-commit: true
+      enable-auto-commit: false
       group-id: "${spring.application.name}"
       key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
       value-deserializer: "org.springframework.kafka.support.serializer.JsonDeserializer"
@@ -108,7 +106,7 @@ spring:
         spring.json.trusted.packages: "zen.lab.*"
         spring.json.value.default.type: "zen.lab.consumer.adapters.edge.inbound.messages.model.ClickEventMessage"
     listener:
-      ack-count: 3
+      ack-mode: MANUAL_IMMEDIATE
       client-id: "${spring.application.name}"
       concurrency: 5
       missing-topics-fatal: false

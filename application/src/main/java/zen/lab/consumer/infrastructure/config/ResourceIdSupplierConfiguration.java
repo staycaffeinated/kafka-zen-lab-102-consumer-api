@@ -6,12 +6,9 @@ package zen.lab.consumer.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import zen.lab.consumer.adapters.helpers.ResourceIdGenerator;
-import zen.lab.consumer.infrastructure.api.providers.ResourceIdSupplier;
+import zen.lab.consumer.application.port.out.ResourceIdSupplier;
+import zen.lab.consumer.infrastructure.providers.ResourceIdGenerator;
 
-/**
- * Configure application dependencies
- */
 @Configuration
 public class ResourceIdSupplierConfiguration {
 

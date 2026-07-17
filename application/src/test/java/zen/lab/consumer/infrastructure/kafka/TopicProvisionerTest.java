@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.internal.topology;
+package zen.lab.consumer.infrastructure.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.kafka.core.KafkaAdmin;
-import zen.lab.consumer.adapters.edge.inbound.messages.topology.TopicProvisioner;
+import zen.lab.consumer.infrastructure.kafka.TopicProvisioner;
 
 class TopicProvisionerTest {
 

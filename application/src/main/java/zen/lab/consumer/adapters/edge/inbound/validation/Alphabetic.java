@@ -15,11 +15,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * This is a constraint for alphabet fields.
- * Besides using this annotation, alphabetic constraints
- * can be defined with, say: @Pattern(regexp = "[a-zA-Z ]").
- * The interface is chosen simply to illustrate how to
- * implement a constraint with an interface.
+ * Constraint that accepts only alphabetic characters (Unicode letters).
+ * Spaces, digits, and punctuation are rejected.
+ * For a pattern that allows spaces use {@code @Pattern(regexp = "[a-zA-Z ]")} instead.
  */
 @Target({METHOD, FIELD, TYPE_USE})
 @Retention(RUNTIME)

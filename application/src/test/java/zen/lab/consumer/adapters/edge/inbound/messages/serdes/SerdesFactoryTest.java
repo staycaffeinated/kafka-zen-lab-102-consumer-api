@@ -1,7 +1,7 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.adapters.internal.serdes;
+package zen.lab.consumer.adapters.edge.inbound.messages.serdes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

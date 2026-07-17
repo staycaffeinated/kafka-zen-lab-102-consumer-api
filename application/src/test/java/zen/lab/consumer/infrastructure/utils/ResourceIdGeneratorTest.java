@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import zen.lab.consumer.adapters.helpers.ResourceIdGenerator;
+import zen.lab.consumer.infrastructure.providers.ResourceIdGenerator;
 
 /**
  * Unit tests of the ResourceIdGenerator class
@@ -82,12 +82,6 @@ class ResourceIdGeneratorTest {
                 .hasSizeBetween(
                         ResourceIdGenerator.ENTROPY_STRING_LENGTH, ResourceIdGenerator.ENTROPY_MAX_NUMERIC_LENGTH);
         assertAllLettersOrDigits(resourceId);
-    }
-
-    @Test
-    void shouldNotReturnNullInstance() {
-        ResourceIdGenerator instance = ResourceIdGenerator.instance();
-        assertThat(instance).isNotNull();
     }
 
     /* ===================================== HELPER METHODS ====================================== */

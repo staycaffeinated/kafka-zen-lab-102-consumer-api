@@ -1,4 +1,7 @@
-package zen.lab.consumer.adapters.edge.inbound.messages.topology;
+/*
+ * Copyright 2026 [CopyrightOwner]
+ */
+package zen.lab.consumer.infrastructure.kafka;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,12 +20,9 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
 /*
- * This is a convenience class that creates the standard topics used by the application.
- * Auto-creating topics and state stores is usually acceptable for local development.
- * Production environments usually have Kubernetes, Terraform or an equivalent tool
- * create the topics.
+ * Creates standard topics on startup. Auto-creating topics is acceptable for local development.
+ * Production environments should use Kubernetes, Terraform, or equivalent tooling.
  */
-
 @Configuration
 @EnableKafka
 @Slf4j
@@ -53,12 +53,10 @@ public class TopicProvisioner {
             log.error("Timed out waiting for topic creation", e);
         }
     }
+
     /*
      * The brokers' default number of partitions and replicas will be used
      * if those values are not explicitly set here.
-     * For guidance on choosing the number of partitions, see:
-     * https://www.confluent.io/blog/how-choose-number-topics-partitions-kafka-cluster/
-     * https://www.confluent.io/blog/kafka-streams-tables-part-2-topics-partitions-and-storage-fundamentals/
      */
     private NewTopic createTopic(String topicName) {
         return TopicBuilder.name(topicName).build();

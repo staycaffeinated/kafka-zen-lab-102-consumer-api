@@ -5,7 +5,7 @@ package zen.lab.consumer.adapters.edge.inbound.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import zen.lab.consumer.adapters.helpers.ResourceIdGenerator;
+import zen.lab.consumer.infrastructure.providers.ResourceIdGenerator;
 
 /**
  * This constraint verifies a String value is
