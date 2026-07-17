@@ -11,7 +11,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Slf4j
 public class JacksonSerializer<T> implements Serializer<T> {
 
-    private JsonMapper jsonMapper;
+    private final JsonMapper jsonMapper;
 
     public JacksonSerializer(@Nonnull JsonMapper jsonMapper) {
         this.jsonMapper = Objects.requireNonNull(jsonMapper, "The JsonMapper must not be null");
