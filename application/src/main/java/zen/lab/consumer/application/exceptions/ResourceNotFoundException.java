@@ -1,18 +1,14 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.infrastructure.exceptions;
+package zen.lab.consumer.application.exceptions;
 
 import java.io.Serial;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * A requested resource was not found
  */
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends ResponseStatusException {
+public class ResourceNotFoundException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = -1144457886816201247L;
@@ -21,14 +17,14 @@ public class ResourceNotFoundException extends ResponseStatusException {
      * Default Constructor
      */
     public ResourceNotFoundException() {
-        super(HttpStatus.NOT_FOUND);
+        super();
     }
 
     /**
      * Constructor
      */
     public ResourceNotFoundException(Throwable throwable) {
-        super(HttpStatus.NOT_FOUND, "The requested resource was not found", throwable);
+        super("The requested resource was not found", throwable);
     }
 
     /**
@@ -38,7 +34,7 @@ public class ResourceNotFoundException extends ResponseStatusException {
      * @param reason the associated reason (optional)
      */
     public ResourceNotFoundException(String reason) {
-        super(HttpStatus.NOT_FOUND, reason);
+        super(reason);
     }
 
     /**
@@ -49,6 +45,6 @@ public class ResourceNotFoundException extends ResponseStatusException {
      * @param cause  a nested exception (optional)
      */
     public ResourceNotFoundException(String reason, Throwable cause) {
-        super(HttpStatus.NOT_FOUND, reason, cause);
+        super(reason, cause);
     }
 }

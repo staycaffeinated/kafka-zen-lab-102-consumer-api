@@ -1,19 +1,15 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.infrastructure.exceptions;
+package zen.lab.consumer.application.exceptions;
 
 import java.io.Serial;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * An UnprocessableEntity exception indicates a well-formed request was
  * received, but could not be successfully processed.
  */
-@ResponseStatus(value = HttpStatus.UNPROCESSABLE_CONTENT)
-public class UnprocessableEntityException extends ResponseStatusException {
+public class UnprocessableEntityException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 2711067751568445348L;
@@ -22,14 +18,14 @@ public class UnprocessableEntityException extends ResponseStatusException {
      * Default Constructor
      */
     public UnprocessableEntityException() {
-        super(HttpStatus.UNPROCESSABLE_CONTENT);
+        super();
     }
 
     /**
      * Constructor
      */
     public UnprocessableEntityException(Throwable throwable) {
-        super(HttpStatus.UNPROCESSABLE_CONTENT, "Unable to process the resource (or entity)", throwable);
+        super("Unable to process the resource (or entity)", throwable);
     }
 
     /**
@@ -39,7 +35,7 @@ public class UnprocessableEntityException extends ResponseStatusException {
      * @param reason the associated reason (optional)
      */
     public UnprocessableEntityException(String reason) {
-        super(HttpStatus.UNPROCESSABLE_CONTENT, reason);
+        super(reason);
     }
 
     /**
@@ -50,6 +46,6 @@ public class UnprocessableEntityException extends ResponseStatusException {
      * @param cause  a nested exception (optional)
      */
     public UnprocessableEntityException(String reason, Throwable cause) {
-        super(HttpStatus.UNPROCESSABLE_CONTENT, reason, cause);
+        super(reason, cause);
     }
 }

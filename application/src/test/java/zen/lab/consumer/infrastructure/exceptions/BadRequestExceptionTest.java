@@ -9,46 +9,44 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
-import org.springframework.http.HttpStatus;
+import zen.lab.consumer.application.exceptions.BadRequestException;
 
 class BadRequestExceptionTest {
 
     @Test
-    void shouldHaveBadRequestStatusWithDefaultConstructor() {
+    void shouldHaveNullMessageWithDefaultConstructor() {
         BadRequestException ex = new BadRequestException();
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(ex.getMessage()).isNull();
     }
 
     @Test
-    void shouldHaveBadRequestStatusWithThrowableConstructor() {
+    void shouldSetDefaultMessageWithThrowableConstructor() {
         Throwable cause = new RuntimeException("underlying cause");
 
         BadRequestException ex = new BadRequestException(cause);
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(ex.getMessage()).isEqualTo("The request cannot be processed due to client error");
         assertThat(ex.getCause()).isSameAs(cause);
     }
 
     @Test
-    void shouldHaveBadRequestStatusWithReasonConstructor() {
+    void shouldSetMessageWithReasonConstructor() {
         String reason = "the request payload is malformed";
 
         BadRequestException ex = new BadRequestException(reason);
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(ex.getReason()).isEqualTo(reason);
+        assertThat(ex.getMessage()).isEqualTo(reason);
     }
 
     @Test
-    void shouldHaveBadRequestStatusWithReasonAndCauseConstructor() {
+    void shouldSetMessageAndCauseWithReasonAndCauseConstructor() {
         String reason = "invalid field value";
         Throwable cause = new IllegalArgumentException("bad value");
 
         BadRequestException ex = new BadRequestException(reason, cause);
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(ex.getReason()).isEqualTo(reason);
+        assertThat(ex.getMessage()).isEqualTo(reason);
         assertThat(ex.getCause()).isSameAs(cause);
     }
 
@@ -60,8 +58,7 @@ class BadRequestExceptionTest {
         void whenThrowableIsNull_defaultConstructorMessageIsSet(Throwable cause) {
             BadRequestException ex = new BadRequestException(cause);
 
-            assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(ex.getReason()).isEqualTo("The request cannot be processed due to client error");
+            assertThat(ex.getMessage()).isEqualTo("The request cannot be processed due to client error");
         }
     }
 }

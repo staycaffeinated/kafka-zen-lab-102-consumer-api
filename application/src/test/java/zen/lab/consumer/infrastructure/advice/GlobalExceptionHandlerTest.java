@@ -36,7 +36,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
-import zen.lab.consumer.infrastructure.exceptions.UnprocessableEntityException;
+import zen.lab.consumer.application.exceptions.UnprocessableEntityException;
 
 /**
  * Unit tests of GlobalExceptionHandler
@@ -144,7 +144,6 @@ class GlobalExceptionHandlerTest {
     void whenUnprocessableEntityException_expectBadRequest() {
         var ex = Mockito.mock(UnprocessableEntityException.class);
         when(ex.getMessage()).thenReturn("A mock message");
-        when(ex.getReason()).thenReturn("A mock reason");
 
         ResponseEntity<ProblemDetail> response = exceptionHandlerUnderTest.handleUnprocessableRequestException(ex);
         assertThat(response).isNotNull();

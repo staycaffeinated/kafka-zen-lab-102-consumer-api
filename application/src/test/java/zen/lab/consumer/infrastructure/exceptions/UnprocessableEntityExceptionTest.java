@@ -9,46 +9,44 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
-import org.springframework.http.HttpStatus;
+import zen.lab.consumer.application.exceptions.UnprocessableEntityException;
 
 class UnprocessableEntityExceptionTest {
 
     @Test
-    void shouldHaveUnprocessableContentStatusWithDefaultConstructor() {
+    void shouldHaveNullMessageWithDefaultConstructor() {
         UnprocessableEntityException ex = new UnprocessableEntityException();
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+        assertThat(ex.getMessage()).isNull();
     }
 
     @Test
-    void shouldHaveUnprocessableContentStatusWithThrowableConstructor() {
+    void shouldSetDefaultMessageWithThrowableConstructor() {
         Throwable cause = new RuntimeException("underlying cause");
 
         UnprocessableEntityException ex = new UnprocessableEntityException(cause);
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+        assertThat(ex.getMessage()).isEqualTo("Unable to process the resource (or entity)");
         assertThat(ex.getCause()).isSameAs(cause);
     }
 
     @Test
-    void shouldHaveUnprocessableContentStatusWithReasonConstructor() {
+    void shouldSetMessageWithReasonConstructor() {
         String reason = "the entity failed business validation";
 
         UnprocessableEntityException ex = new UnprocessableEntityException(reason);
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
-        assertThat(ex.getReason()).isEqualTo(reason);
+        assertThat(ex.getMessage()).isEqualTo(reason);
     }
 
     @Test
-    void shouldHaveUnprocessableContentStatusWithReasonAndCauseConstructor() {
+    void shouldSetMessageAndCauseWithReasonAndCauseConstructor() {
         String reason = "duplicate key detected";
         Throwable cause = new IllegalStateException("key conflict");
 
         UnprocessableEntityException ex = new UnprocessableEntityException(reason, cause);
 
-        assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
-        assertThat(ex.getReason()).isEqualTo(reason);
+        assertThat(ex.getMessage()).isEqualTo(reason);
         assertThat(ex.getCause()).isSameAs(cause);
     }
 
@@ -60,8 +58,7 @@ class UnprocessableEntityExceptionTest {
         void whenThrowableIsNull_defaultConstructorMessageIsSet(Throwable cause) {
             UnprocessableEntityException ex = new UnprocessableEntityException(cause);
 
-            assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
-            assertThat(ex.getReason()).isEqualTo("Unable to process the resource (or entity)");
+            assertThat(ex.getMessage()).isEqualTo("Unable to process the resource (or entity)");
         }
     }
 }

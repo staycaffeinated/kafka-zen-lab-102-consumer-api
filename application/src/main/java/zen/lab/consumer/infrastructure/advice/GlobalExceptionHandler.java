@@ -23,7 +23,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import zen.lab.consumer.infrastructure.exceptions.UnprocessableEntityException;
+import zen.lab.consumer.application.exceptions.BadRequestException;
+import zen.lab.consumer.application.exceptions.ResourceNotFoundException;
+import zen.lab.consumer.application.exceptions.UnprocessableEntityException;
 
 /**
  * Handles turning exceptions into RFC-7807 problem/json responses,
@@ -39,6 +41,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     public GlobalExceptionHandler(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ProblemDetail> handleBadRequestException(BadRequestException exception) {
+        return problemDescription("The request cannot be processed due to client error", exception, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleResourceNotFoundException(ResourceNotFoundException exception) {
+        return problemDescription("The requested resource was not found", exception, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UnprocessableEntityException.class)
