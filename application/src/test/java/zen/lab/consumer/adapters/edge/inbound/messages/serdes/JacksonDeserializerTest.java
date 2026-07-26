@@ -1,9 +1,11 @@
 package zen.lab.consumer.adapters.edge.inbound.messages.serdes;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
+import org.apache.kafka.common.errors.SerializationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,11 +54,12 @@ class JacksonDeserializerTest {
         }
 
         @Test
-        void whenMalformedJson_thenReturnsNull() {
+        void whenMalformedJson_thenThrowsSerializationException() {
             try (JacksonDeserializer<TestObject> deserializer = new JacksonDeserializer<>(TestObject.class)) {
                 byte[] malformed = "not-valid-json".getBytes();
-                TestObject actual = deserializer.deserialize("fake-topic", malformed);
-                assertThat(actual).isNull();
+                assertThatThrownBy(() -> deserializer.deserialize("fake-topic", malformed))
+                        .isInstanceOf(SerializationException.class)
+                        .hasMessageContaining("fake-topic");
             }
         }
 
