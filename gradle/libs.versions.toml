@@ -1,4 +1,5 @@
 [versions]
+archunit = '1.3.0'
 assertJ = '3.27.7'
 datafaker = '2.5.4'
 flyway = '12.6.1'
@@ -35,6 +36,8 @@ versions = '0.54.0'
 [libraries]
 apache-kafka-streams = { module = "org.apache.kafka:kafka-streams" }
 apache-kafka-streams-test-utils = { module = "org.apache.kafka:kafka-streams-test-utils" }
+
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 
 assertJ = { module = "org.assertj:assertj-core", version.ref = "assertJ" }
 
