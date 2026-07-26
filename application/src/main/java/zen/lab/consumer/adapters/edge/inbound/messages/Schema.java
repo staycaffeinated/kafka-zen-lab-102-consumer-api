@@ -1,7 +1,7 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.infrastructure.kafka;
+package zen.lab.consumer.adapters.edge.inbound.messages;
 
 /*
  * Enumerates the Kafka topics used by the application.

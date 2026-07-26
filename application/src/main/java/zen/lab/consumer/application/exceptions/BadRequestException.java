@@ -8,7 +8,6 @@ import java.io.Serial;
 /**
  * Indicates the request could not be processed due to a client error (HTTP 400).
  */
-
 public class BadRequestException extends RuntimeException {
 
     @Serial

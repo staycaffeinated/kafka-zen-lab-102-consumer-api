@@ -19,5 +19,4 @@ public record Product(
         BigDecimal ratingAverage,
         BigInteger ratingCount,
         Set<String> tags,
-        String imageUrl
-) {}
+        String imageUrl) {}

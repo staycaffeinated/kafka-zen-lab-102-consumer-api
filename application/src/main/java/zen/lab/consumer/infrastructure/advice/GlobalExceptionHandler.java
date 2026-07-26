@@ -45,7 +45,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ProblemDetail> handleBadRequestException(BadRequestException exception) {
-        return problemDescription("The request cannot be processed due to client error", exception, HttpStatus.BAD_REQUEST);
+        return problemDescription(
+                "The request cannot be processed due to client error", exception, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.kafka.core.KafkaAdmin;
+import zen.lab.consumer.adapters.edge.inbound.messages.TopicProvisioner;
 
 class TopicProvisionerTest {
 

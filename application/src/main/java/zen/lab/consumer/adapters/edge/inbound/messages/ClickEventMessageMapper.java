@@ -65,18 +65,12 @@ public class ClickEventMessageMapper {
                 msg.getRatingAverage(),
                 msg.getRatingCount(),
                 msg.getTags(),
-                msg.getImageUrl()
-        );
+                msg.getImageUrl());
     }
 
     private Context toContext(ContextMessage msg) {
         if (msg == null) return null;
         return new Context(
-                msg.getPageId(),
-                msg.getPosition(),
-                msg.getSource(),
-                msg.getReferrer(),
-                msg.getSearchQuery()
-        );
+                msg.getPageId(), msg.getPosition(), msg.getSource(), msg.getReferrer(), msg.getSearchQuery());
     }
 }

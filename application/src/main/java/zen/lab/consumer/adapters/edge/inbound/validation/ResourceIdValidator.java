@@ -5,7 +5,8 @@ package zen.lab.consumer.adapters.edge.inbound.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import zen.lab.consumer.application.port.out.ResourceIdSupplier;
+import zen.lab.consumer.application.port.outbound.ResourceIdSupplier;
+import zen.lab.consumer.domain.shared.ResourceIdFormat;
 
 /**
  * This constraint verifies a String value is
@@ -39,7 +40,7 @@ public class ResourceIdValidator implements ConstraintValidator<ResourceId, Stri
 
     public boolean isValid(String value) {
         return value != null
-                && value.length() == ResourceIdSupplier.RESOURCE_ID_LENGTH
+                && value.length() == ResourceIdFormat.RESOURCE_ID_LENGTH
                 && value.chars().allMatch(Character::isLetterOrDigit);
     }
 }

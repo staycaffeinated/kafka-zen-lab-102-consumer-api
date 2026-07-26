@@ -7,7 +7,8 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import lombok.NonNull;
-import zen.lab.consumer.application.port.out.ResourceIdSupplier;
+import zen.lab.consumer.application.port.outbound.ResourceIdSupplier;
+import zen.lab.consumer.domain.shared.ResourceIdFormat;
 
 /**
  * Produces secure random values with 160-bit entropy, suitable for use as client-visible
@@ -27,7 +28,7 @@ public class ResourceIdGenerator implements ResourceIdSupplier {
     // Alphanumeric cipher alphabet — excludes URL-unsafe characters per RFC 1738.
     private static final String CIPHER_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    public static final int ENTROPY_STRING_LENGTH = ResourceIdSupplier.RESOURCE_ID_LENGTH;
+    public static final int ENTROPY_STRING_LENGTH = ResourceIdFormat.RESOURCE_ID_LENGTH;
 
     // Numeric IDs use 160-bit BigInteger, which can reach 49 decimal digits.
     public static final int ENTROPY_MAX_NUMERIC_LENGTH = 49;

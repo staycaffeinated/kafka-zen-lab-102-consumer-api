@@ -4,8 +4,8 @@
 package zen.lab.consumer.infrastructure.common;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static zen.lab.consumer.infrastructure.profiles.SpringProfiles.INTEGRATION_TEST;
-import static zen.lab.consumer.infrastructure.profiles.SpringProfiles.TEST;
+import static zen.lab.consumer.adapters.shared.profiles.SpringProfiles.INTEGRATION_TEST;
+import static zen.lab.consumer.adapters.shared.profiles.SpringProfiles.TEST;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

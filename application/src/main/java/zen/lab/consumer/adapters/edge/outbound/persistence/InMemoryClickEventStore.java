@@ -1,11 +1,11 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.infrastructure.adapter.persistence;
+package zen.lab.consumer.adapters.edge.outbound.persistence;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import zen.lab.consumer.application.port.out.ClickEventStore;
+import zen.lab.consumer.application.port.outbound.ClickEventStore;
 import zen.lab.consumer.domain.events.ClickEvent;
 
 @Component

@@ -1,7 +1,7 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.infrastructure.profiles;
+package zen.lab.consumer.adapters.shared.profiles;
 
 /**
  * Spring profiles
