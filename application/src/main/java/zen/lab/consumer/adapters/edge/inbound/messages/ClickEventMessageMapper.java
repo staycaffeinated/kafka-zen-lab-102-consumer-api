@@ -50,33 +50,33 @@ public class ClickEventMessageMapper {
 
     private Product toProduct(ProductMessage msg) {
         if (msg == null) return null;
-        return Product.builder()
-                .productId(msg.getProductId())
-                .sku(msg.getSku())
-                .name(msg.getName())
-                .slug(msg.getSlug())
-                .category(msg.getCategory())
-                .subCategory(msg.getSubCategory())
-                .brand(msg.getBrand())
-                .price(msg.getPrice())
-                .priceCurrency(msg.getPriceCurrency())
-                .inStock(msg.isInStock())
-                .inventoryCount(msg.getInventoryCount())
-                .ratingAverage(msg.getRatingAverage())
-                .ratingCount(msg.getRatingCount())
-                .tags(msg.getTags())
-                .imageUrl(msg.getImageUrl())
-                .build();
+        return new Product(
+                msg.getProductId(),
+                msg.getSku(),
+                msg.getName(),
+                msg.getSlug(),
+                msg.getCategory(),
+                msg.getSubCategory(),
+                msg.getBrand(),
+                msg.getPrice(),
+                msg.getPriceCurrency(),
+                msg.isInStock(),
+                msg.getInventoryCount(),
+                msg.getRatingAverage(),
+                msg.getRatingCount(),
+                msg.getTags(),
+                msg.getImageUrl()
+        );
     }
 
     private Context toContext(ContextMessage msg) {
         if (msg == null) return null;
-        return Context.builder()
-                .pageId(msg.getPageId())
-                .position(msg.getPosition())
-                .source(msg.getSource())
-                .referrer(msg.getReferrer())
-                .searchQuery(msg.getSearchQuery())
-                .build();
+        return new Context(
+                msg.getPageId(),
+                msg.getPosition(),
+                msg.getSource(),
+                msg.getReferrer(),
+                msg.getSearchQuery()
+        );
     }
 }
