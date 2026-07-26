@@ -5,7 +5,6 @@ package zen.lab.consumer.adapters.edge.inbound.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import zen.lab.consumer.application.port.outbound.ResourceIdSupplier;
 import zen.lab.consumer.domain.shared.ResourceIdFormat;
 
 /**
