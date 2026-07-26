@@ -9,6 +9,8 @@ import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -102,8 +104,53 @@ class ArchitectureTest {
             .haveSimpleNameEndingWith("Exception");
 
     // ──────────────────────────────────────────────────────────────────────
+    // Domain purity
+    // ──────────────────────────────────────────────────────────────────────
+
+    @ArchTest
+    static final ArchRule domain_must_not_use_spring_or_persistence = noClasses()
+            .that()
+            .resideInAPackage("zen.lab.consumer.domain..")
+            .should()
+            .dependOnClassesThat()
+            .resideInAnyPackage("org.springframework..", "jakarta.persistence..");
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Port contracts
+    // ──────────────────────────────────────────────────────────────────────
+
+    @ArchTest
+    static final ArchRule inbound_ports_must_be_interfaces = classes()
+            .that()
+            .resideInAPackage("zen.lab.consumer.application.port.inbound..")
+            .should()
+            .beInterfaces();
+
+    @ArchTest
+    static final ArchRule outbound_ports_must_be_interfaces = classes()
+            .that()
+            .resideInAPackage("zen.lab.consumer.application.port.outbound..")
+            .should()
+            .beInterfaces();
+
+    // ──────────────────────────────────────────────────────────────────────
     // Spring best practices
     // ──────────────────────────────────────────────────────────────────────
+
+    @ArchTest
+    static final ArchRule services_must_reside_in_application_service = classes()
+            .that()
+            .areAnnotatedWith(Service.class)
+            .should()
+            .resideInAPackage("zen.lab.consumer.application.service..");
+
+    @ArchTest
+    static final ArchRule kafka_listeners_must_reside_in_adapters = methods()
+            .that()
+            .areAnnotatedWith(KafkaListener.class)
+            .should()
+            .beDeclaredInClassesThat()
+            .resideInAPackage("zen.lab.consumer.adapters..");
 
     @ArchTest
     static final ArchRule no_field_injection = noFields()
