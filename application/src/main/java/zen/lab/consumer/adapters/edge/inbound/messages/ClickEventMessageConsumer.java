@@ -6,8 +6,6 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import zen.lab.consumer.adapters.edge.inbound.messages.model.ClickEventMessage;
 import zen.lab.consumer.application.port.in.MessageConsumerUseCase;
-import zen.lab.consumer.infrastructure.kafka.Schema;
-
 @Component
 @RequiredArgsConstructor
 public class ClickEventMessageConsumer {
@@ -15,7 +13,7 @@ public class ClickEventMessageConsumer {
     private final MessageConsumerUseCase messageConsumerUseCase;
     private final ClickEventMessageMapper clickEventMessageMapper;
 
-    @KafkaListener(topics = Schema.Topics.CLICK_EVENT_RECEIVED)
+    @KafkaListener(topics = KafkaTopics.CLICK_EVENT_RECEIVED)
     public void consume(ClickEventMessage message, Acknowledgment acknowledgment) {
         messageConsumerUseCase.process(clickEventMessageMapper.toDomain(message));
         acknowledgment.acknowledge();

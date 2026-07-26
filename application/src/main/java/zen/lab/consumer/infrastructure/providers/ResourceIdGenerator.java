@@ -27,8 +27,7 @@ public class ResourceIdGenerator implements ResourceIdSupplier {
     // Alphanumeric cipher alphabet — excludes URL-unsafe characters per RFC 1738.
     private static final String CIPHER_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    // With 62-character alphabet and length 27: 62^27 = 2.48e48 permutations > 160-bit entropy (1.4e48).
-    public static final int ENTROPY_STRING_LENGTH = 27;
+    public static final int ENTROPY_STRING_LENGTH = ResourceIdSupplier.RESOURCE_ID_LENGTH;
 
     // Numeric IDs use 160-bit BigInteger, which can reach 49 decimal digits.
     public static final int ENTROPY_MAX_NUMERIC_LENGTH = 49;
