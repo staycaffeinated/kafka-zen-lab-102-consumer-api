@@ -3,11 +3,10 @@ package zen.lab.consumer.adapters.edge.inbound.messages.serdes;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 import tools.jackson.databind.json.JsonMapper;
 
-@Slf4j
 public class JacksonDeserializer<T> implements Deserializer<T> {
 
     private final Class<T> destinationClass;
@@ -41,8 +40,8 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
         try {
             return jsonMapper.readValue(data, destinationClass);
         } catch (Exception e) {
-            log.error("An exception occurred in the deserializer: {}", e.getMessage(), e);
-            return null;
+            throw new SerializationException(
+                    String.format("Failed to deserialize message from topic '%s'", topic), e);
         }
     }
 }
