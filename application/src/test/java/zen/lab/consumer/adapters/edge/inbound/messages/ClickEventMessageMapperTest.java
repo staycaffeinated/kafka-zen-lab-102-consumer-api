@@ -2,15 +2,19 @@ package zen.lab.consumer.adapters.edge.inbound.messages;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import zen.lab.consumer.adapters.edge.inbound.messages.model.ContextMessage;
+import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductAddedToCartEventMessage;
 import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductMessage;
 import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductViewedEventMessage;
+import zen.lab.consumer.domain.events.ProductAddedToCartEvent;
 import zen.lab.consumer.domain.events.ProductViewedEvent;
 
 class ClickEventMessageMapperTest {
@@ -19,6 +23,7 @@ class ClickEventMessageMapperTest {
 
     private static final String EVENT_ID = "evt-001";
     private static final String EVENT_TYPE = "product.viewed";
+    private static final String EVENT_TYPE_PRODUCT_ADDED_TO_CART = "product.added_to_cart";
     private static final Instant TIMESTAMP = Instant.parse("2024-01-15T10:00:00Z");
     private static final String USER_ID = "user-abc";
     private static final String SESSION_ID = "session-xyz";
@@ -46,6 +51,8 @@ class ClickEventMessageMapperTest {
     private static final String SOURCE = "search";
     private static final String REFERRER = "https://example.com";
     private static final String SEARCH_QUERY = "blue sneakers";
+
+    private static final Map<String, Serializable> METADATA = Map.of("someKey", "someValue");
 
     @Nested
     class NullHandling {
@@ -153,6 +160,48 @@ class ClickEventMessageMapperTest {
             assertThat(result.context().referrer()).isEqualTo(REFERRER);
             assertThat(result.context().searchQuery()).isEqualTo(SEARCH_QUERY);
         }
+    }
+
+    @Nested
+    class ProductAddedToCartMapping {
+        @Test
+        void mapsAllBaseFieldsFromMessage() {
+            ProductAddedToCartEventMessage message = aProductAddedToCartEventMessage();
+
+            ProductAddedToCartEvent result = (ProductAddedToCartEvent) mapper.toDomain(message);
+
+            // check the fields of the parent class
+            assertThat(result.eventId()).isEqualTo(EVENT_ID);
+            assertThat(result.eventType()).isEqualTo(EVENT_TYPE_PRODUCT_ADDED_TO_CART);
+            assertThat(result.sessionId()).isEqualTo(SESSION_ID);
+            assertThat(result.correlationId()).isEqualTo(CORRELATION_ID);
+            assertThat(result.userId()).isEqualTo(USER_ID);
+            assertThat(result.timestamp()).isEqualTo(TIMESTAMP);
+        }
+
+        @Test
+        void mapsAllProductFieldsFromMessage() {
+            ProductAddedToCartEventMessage message = aProductAddedToCartEventMessage();
+
+            ProductAddedToCartEvent result = (ProductAddedToCartEvent) mapper.toDomain(message);
+
+            assertThat(result.productId()).isEqualTo(PRODUCT_ID);
+            assertThat(result.metadata()).isEqualTo(METADATA);
+        }
+    }
+
+    private ProductAddedToCartEventMessage aProductAddedToCartEventMessage() {
+        return ProductAddedToCartEventMessage.builder()
+                .eventId(EVENT_ID)
+                .productId(PRODUCT_ID)
+                .correlationId(CORRELATION_ID)
+                .partitionKey(PARTITION_KEY)
+                .sessionId(SESSION_ID)
+                .userId(USER_ID)
+                .eventType(EVENT_TYPE_PRODUCT_ADDED_TO_CART)
+                .timestamp(TIMESTAMP)
+                .metadata(METADATA)
+                .build();
     }
 
     private static ProductMessage aProductMessage() {

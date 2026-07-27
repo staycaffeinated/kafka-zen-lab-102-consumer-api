@@ -73,7 +73,8 @@ class ClickEventMessageConsumerTest {
                     .when(messageConsumerUseCase)
                     .process(A_DOMAIN_EVENT);
 
-            assertThatThrownBy(() -> consumer.consume(aRecord(A_MESSAGE), acknowledgment))
+            var consumerRecord = aRecord(A_MESSAGE);
+            assertThatThrownBy(() -> consumer.consume(consumerRecord, acknowledgment))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("processing failed");
 
@@ -86,7 +87,8 @@ class ClickEventMessageConsumerTest {
                     .when(clickEventMessageMapper)
                     .toDomain(A_MESSAGE);
 
-            assertThatThrownBy(() -> consumer.consume(aRecord(A_MESSAGE), acknowledgment))
+            var consumerRecord = aRecord(A_MESSAGE);
+            assertThatThrownBy(() -> consumer.consume(consumerRecord, acknowledgment))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("deserialization failed");
 
