@@ -23,29 +23,27 @@ public class ClickEventMessageMapper {
     }
 
     private ProductViewedEvent toProductViewedEvent(ProductViewedEventMessage message) {
-        return ProductViewedEvent.builder()
-                .eventId(message.getEventId())
-                .eventType(message.getEventType())
-                .timestamp(message.getTimestamp())
-                .userId(message.getUserId())
-                .sessionId(message.getSessionId())
-                .correlationId(message.getCorrelationId())
-                .product(toProduct(message.getProduct()))
-                .context(toContext(message.getContext()))
-                .build();
+        return new ProductViewedEvent(
+                message.getEventId(),
+                message.getEventType(),
+                message.getTimestamp(),
+                message.getUserId(),
+                message.getSessionId(),
+                message.getCorrelationId(),
+                toProduct(message.getProduct()),
+                toContext(message.getContext()));
     }
 
     private ProductAddedToCartEvent toProductAddedToCartEvent(ProductAddedToCartEventMessage message) {
-        return ProductAddedToCartEvent.builder()
-                .eventId(message.getEventId())
-                .eventType(message.getEventType())
-                .timestamp(message.getTimestamp())
-                .userId(message.getUserId())
-                .sessionId(message.getSessionId())
-                .correlationId(message.getCorrelationId())
-                .productId(message.getProductId())
-                .metadata(message.getMetadata())
-                .build();
+        return new ProductAddedToCartEvent(
+                message.getEventId(),
+                message.getEventType(),
+                message.getTimestamp(),
+                message.getUserId(),
+                message.getSessionId(),
+                message.getCorrelationId(),
+                message.getProductId(),
+                message.getMetadata());
     }
 
     private Product toProduct(ProductMessage msg) {

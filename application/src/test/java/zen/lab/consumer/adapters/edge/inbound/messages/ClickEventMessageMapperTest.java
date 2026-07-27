@@ -61,7 +61,7 @@ class ClickEventMessageMapperTest {
 
             ProductViewedEvent result = (ProductViewedEvent) mapper.toDomain(message);
 
-            assertThat(result.getProduct()).isNull();
+            assertThat(result.product()).isNull();
         }
 
         @Test
@@ -75,7 +75,7 @@ class ClickEventMessageMapperTest {
 
             ProductViewedEvent result = (ProductViewedEvent) mapper.toDomain(message);
 
-            assertThat(result.getContext()).isNull();
+            assertThat(result.context()).isNull();
         }
     }
 
@@ -98,12 +98,12 @@ class ClickEventMessageMapperTest {
 
             ProductViewedEvent result = (ProductViewedEvent) mapper.toDomain(message);
 
-            assertThat(result.getEventId()).isEqualTo(EVENT_ID);
-            assertThat(result.getEventType()).isEqualTo(EVENT_TYPE);
-            assertThat(result.getTimestamp()).isEqualTo(TIMESTAMP);
-            assertThat(result.getUserId()).isEqualTo(USER_ID);
-            assertThat(result.getSessionId()).isEqualTo(SESSION_ID);
-            assertThat(result.getCorrelationId()).isEqualTo(CORRELATION_ID);
+            assertThat(result.eventId()).isEqualTo(EVENT_ID);
+            assertThat(result.eventType()).isEqualTo(EVENT_TYPE);
+            assertThat(result.timestamp()).isEqualTo(TIMESTAMP);
+            assertThat(result.userId()).isEqualTo(USER_ID);
+            assertThat(result.sessionId()).isEqualTo(SESSION_ID);
+            assertThat(result.correlationId()).isEqualTo(CORRELATION_ID);
         }
 
         @Test
@@ -117,22 +117,22 @@ class ClickEventMessageMapperTest {
 
             ProductViewedEvent result = (ProductViewedEvent) mapper.toDomain(message);
 
-            assertThat(result.getProduct()).isNotNull();
-            assertThat(result.getProduct().productId()).isEqualTo(PRODUCT_ID);
-            assertThat(result.getProduct().sku()).isEqualTo(SKU);
-            assertThat(result.getProduct().name()).isEqualTo(PRODUCT_NAME);
-            assertThat(result.getProduct().slug()).isEqualTo(SLUG);
-            assertThat(result.getProduct().category()).isEqualTo(CATEGORY);
-            assertThat(result.getProduct().subCategory()).isEqualTo(SUB_CATEGORY);
-            assertThat(result.getProduct().brand()).isEqualTo(BRAND);
-            assertThat(result.getProduct().price()).isEqualByComparingTo(PRICE);
-            assertThat(result.getProduct().priceCurrency()).isEqualTo(PRICE_CURRENCY);
-            assertThat(result.getProduct().inStock()).isEqualTo(IN_STOCK);
-            assertThat(result.getProduct().inventoryCount()).isEqualTo(INVENTORY_COUNT);
-            assertThat(result.getProduct().ratingAverage()).isEqualByComparingTo(RATING_AVERAGE);
-            assertThat(result.getProduct().ratingCount()).isEqualTo(RATING_COUNT);
-            assertThat(result.getProduct().tags()).containsExactlyInAnyOrderElementsOf(TAGS);
-            assertThat(result.getProduct().imageUrl()).isEqualTo(IMAGE_URL);
+            assertThat(result.product()).isNotNull();
+            assertThat(result.product().productId()).isEqualTo(PRODUCT_ID);
+            assertThat(result.product().sku()).isEqualTo(SKU);
+            assertThat(result.product().name()).isEqualTo(PRODUCT_NAME);
+            assertThat(result.product().slug()).isEqualTo(SLUG);
+            assertThat(result.product().category()).isEqualTo(CATEGORY);
+            assertThat(result.product().subCategory()).isEqualTo(SUB_CATEGORY);
+            assertThat(result.product().brand()).isEqualTo(BRAND);
+            assertThat(result.product().price()).isEqualByComparingTo(PRICE);
+            assertThat(result.product().priceCurrency()).isEqualTo(PRICE_CURRENCY);
+            assertThat(result.product().inStock()).isEqualTo(IN_STOCK);
+            assertThat(result.product().inventoryCount()).isEqualTo(INVENTORY_COUNT);
+            assertThat(result.product().ratingAverage()).isEqualByComparingTo(RATING_AVERAGE);
+            assertThat(result.product().ratingCount()).isEqualTo(RATING_COUNT);
+            assertThat(result.product().tags()).containsExactlyInAnyOrderElementsOf(TAGS);
+            assertThat(result.product().imageUrl()).isEqualTo(IMAGE_URL);
         }
 
         @Test
@@ -146,12 +146,12 @@ class ClickEventMessageMapperTest {
 
             ProductViewedEvent result = (ProductViewedEvent) mapper.toDomain(message);
 
-            assertThat(result.getContext()).isNotNull();
-            assertThat(result.getContext().pageId()).isEqualTo(PAGE_ID);
-            assertThat(result.getContext().position()).isEqualTo(POSITION);
-            assertThat(result.getContext().source()).isEqualTo(SOURCE);
-            assertThat(result.getContext().referrer()).isEqualTo(REFERRER);
-            assertThat(result.getContext().searchQuery()).isEqualTo(SEARCH_QUERY);
+            assertThat(result.context()).isNotNull();
+            assertThat(result.context().pageId()).isEqualTo(PAGE_ID);
+            assertThat(result.context().position()).isEqualTo(POSITION);
+            assertThat(result.context().source()).isEqualTo(SOURCE);
+            assertThat(result.context().referrer()).isEqualTo(REFERRER);
+            assertThat(result.context().searchQuery()).isEqualTo(SEARCH_QUERY);
         }
     }
 
