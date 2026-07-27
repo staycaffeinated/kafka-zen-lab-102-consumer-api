@@ -4,6 +4,37 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * Domain event that records a user adding a product to their shopping cart.
+ *
+ * <p>This record is an immutable value object in the domain layer. Unlike
+ * {@link ProductViewedEvent}, it does not carry a full product snapshot; instead it
+ * carries only the {@code productId} and an open-ended {@code metadata} map for
+ * upstream-defined key-value pairs (e.g., quantity, coupon code).
+ *
+ * <p>Use {@link #builder()} to construct instances:
+ * <pre>{@code
+ * ProductAddedToCartEvent event = ProductAddedToCartEvent.builder()
+ *     .eventId("evt-002")
+ *     .eventType("cart.item.added")
+ *     .timestamp(Instant.now())
+ *     .userId("usr-42")
+ *     .sessionId("sess-xyz")
+ *     .correlationId("corr-abc")
+ *     .productId("prod-999")
+ *     .metadata(Map.of("quantity", 2))
+ *     .build();
+ * }</pre>
+ *
+ * @param eventId       globally unique event identifier
+ * @param eventType     discriminator string; expected value is {@code "cart.item.added"}
+ * @param timestamp     UTC instant the cart action occurred
+ * @param userId        user or anonymous session identifier
+ * @param sessionId     browser/app session identifier
+ * @param correlationId trace correlation across upstream events
+ * @param productId     identifier of the product added to the cart
+ * @param metadata      arbitrary key-value pairs from the upstream event payload
+ */
 public record ProductAddedToCartEvent(
         String eventId,
         String eventType,

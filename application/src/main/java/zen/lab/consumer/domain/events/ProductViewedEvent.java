@@ -5,6 +5,36 @@ import org.jspecify.annotations.NonNull;
 import zen.lab.consumer.domain.model.Context;
 import zen.lab.consumer.domain.model.Product;
 
+/**
+ * Domain event that records a user viewing a product detail page.
+ *
+ * <p>This record is an immutable value object in the domain layer. It carries a full
+ * snapshot of the {@link Product} as it appeared at the moment of the view, together
+ * with the page {@link Context} describing where the product was displayed.
+ *
+ * <p>Use {@link #builder()} to construct instances:
+ * <pre>{@code
+ * ProductViewedEvent event = ProductViewedEvent.builder()
+ *     .eventId("evt-001")
+ *     .eventType("product.viewed")
+ *     .timestamp(Instant.now())
+ *     .userId("usr-42")
+ *     .sessionId("sess-xyz")
+ *     .correlationId("corr-abc")
+ *     .product(product)
+ *     .context(context)
+ *     .build();
+ * }</pre>
+ *
+ * @param eventId       globally unique event identifier
+ * @param eventType     discriminator string; expected value is {@code "product.viewed"}
+ * @param timestamp     UTC instant the view occurred
+ * @param userId        user or anonymous session identifier
+ * @param sessionId     browser/app session identifier
+ * @param correlationId trace correlation across upstream events
+ * @param product       full product snapshot at view time
+ * @param context       page context at view time
+ */
 public record ProductViewedEvent(
         String eventId,
         String eventType,

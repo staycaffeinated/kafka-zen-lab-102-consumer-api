@@ -4,6 +4,40 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Set;
 
+/**
+ * Immutable value object representing a product snapshot captured at the time of a
+ * click-stream event.
+ *
+ * <p>Because this is a record, all fields are final and the canonical constructor is
+ * the only way to set them. Use {@link #builder()} when constructing from external
+ * data:
+ * <pre>{@code
+ * Product product = Product.builder()
+ *     .productId("prod-123")
+ *     .sku("SKU-ABC")
+ *     .name("Wireless Headphones")
+ *     .price(new BigDecimal("49.99"))
+ *     .priceCurrency("USD")
+ *     .inStock(true)
+ *     .build();
+ * }</pre>
+ *
+ * @param productId      unique product identifier
+ * @param sku            stock-keeping unit code
+ * @param name           display name
+ * @param slug           URL-friendly identifier
+ * @param category       top-level category
+ * @param subCategory    sub-category
+ * @param brand          brand name
+ * @param price          unit price
+ * @param priceCurrency  ISO 4217 currency code (e.g. {@code "USD"})
+ * @param inStock        stock availability flag
+ * @param inventoryCount units in stock
+ * @param ratingAverage  mean customer rating
+ * @param ratingCount    total number of ratings
+ * @param tags           searchable tags
+ * @param imageUrl       primary image URL
+ */
 public record Product(
         String productId,
         String sku,

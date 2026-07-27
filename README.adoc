@@ -1,108 +1,552 @@
 :toc: auto
+:toc-title: Contents
+:toclevels: 3
 
-= A Guide to Using this Application
+= kafka-zen-lab-102-consumer-api
 
-== Developers Guide
+Spring Boot Kafka consumer that ingests click-stream events produced by
+`kafka-zen-lab-101-traffic-simulator`, maps them to domain events, and stores them.
+
+== Overview
+
+[cols="1,3"]
+|===
+|Concern |Detail
+
+|Runtime
+|Spring Boot 4 / Java 21
+
+|Messaging
+|Apache Kafka (Spring Kafka)
+
+|Architecture
+|Hexagonal (Ports & Adapters) + Clean Architecture layers
+
+|Build
+|Gradle multi-project with custom convention plugins
+
+|Container
+|Jib → OCI image (`kafka-zen-lab-102-consumer-api:latest`)
+|===
+
+=== What It Does
+
+1. Listens on `kafka-zen.lab-101.traffic-simulator.click-event.received`
+2. Deserialises JSON into a `ClickEventMessage` subtype (discriminated by `eventType`)
+3. Maps the message to a domain `ClickEvent`
+4. Passes the event to `ClickEventProcessingService`, which persists it via `ClickEventStore`
+5. Acknowledges the Kafka offset (manual ack)
+6. On failure: retries 3× with 1 s back-off, then routes to the DLQ
+
+== Architecture
+
+----
+Inbound Adapters              Application Layer               Outbound Adapters
+──────────────────────────── ──────────────────────────────  ─────────────────────────────
+ClickEventMessageConsumer ──► MessageConsumerUseCase (port)   ClickEventStore (port)
+ClickEventMessageMapper       ClickEventProcessingService ──► InMemoryClickEventStore (impl)
+                              (service)
+----
+
+=== Package Structure
+
+[cols="2,3"]
+|===
+|Package |Responsibility
+
+|`adapters.edge.inbound.messages`
+|Kafka listener, message mapper, message model, Serde
+
+|`adapters.edge.inbound.rest`
+|Health/root REST endpoint
+
+|`adapters.edge.inbound.validation`
+|Custom Bean Validation constraints (`@Alphabetic`, `@ResourceId`, `@SearchText`)
+
+|`adapters.edge.outbound.persistence`
+|`InMemoryClickEventStore` (stub; replace with real store)
+
+|`application.port.inbound`
+|`MessageConsumerUseCase` — inbound port
+
+|`application.port.outbound`
+|`ClickEventStore`, `ResourceIdSupplier` — outbound ports
+
+|`application.service`
+|`ClickEventProcessingService` — use-case implementation
+
+|`domain.events`
+|`ClickEvent` sealed interface; `ProductViewedEvent`, `ProductAddedToCartEvent`
+
+|`domain.model`
+|`Context`, `Product` value records
+
+|`infrastructure.config`
+|Spring configuration beans (Kafka, Jackson, CORS, etc.)
+|===
+
+== Domain Model Reference
+
+=== `ClickEvent` (sealed interface)
+
+[source,java]
+----
+public sealed interface ClickEvent
+    permits ProductViewedEvent, ProductAddedToCartEvent
+----
+
+[cols="1,1,3"]
+|===
+|Method |Type |Description
+
+|`eventId()`
+|`String`
+|Globally-unique event identifier
+
+|`eventType()`
+|`String`
+|Discriminator string (matches JSON `eventType` field)
+
+|`timestamp()`
+|`Instant`
+|UTC instant the event occurred
+
+|`userId()`
+|`String`
+|Anonymous or authenticated user identifier
+
+|`sessionId()`
+|`String`
+|Browser/app session identifier
+
+|`correlationId()`
+|`String`
+|Trace correlation across upstream events
+|===
+
+=== `ProductViewedEvent`
+
+Implements `ClickEvent`. JSON `eventType = "product.viewed"`.
+
+Additional fields:
+
+[cols="1,1,3"]
+|===
+|Field |Type |Description
+
+|`product`
+|`Product`
+|Full product snapshot at view time
+
+|`context`
+|`Context`
+|Page context at view time
+|===
+
+Builder:
+
+[source,java]
+----
+ProductViewedEvent event = ProductViewedEvent.builder()
+    .eventId("evt-001")
+    .eventType("product.viewed")
+    .timestamp(Instant.now())
+    .userId("usr-42")
+    .sessionId("sess-xyz")
+    .correlationId("corr-abc")
+    .product(product)
+    .context(context)
+    .build();
+----
+
+=== `ProductAddedToCartEvent`
+
+Implements `ClickEvent`. JSON `eventType = "cart.item.added"`.
+
+Additional fields:
+
+[cols="1,1,3"]
+|===
+|Field |Type |Description
+
+|`productId`
+|`String`
+|Identifier of the product added
+
+|`metadata`
+|`Map<String, Serializable>`
+|Arbitrary key-value pairs from the upstream event
+|===
+
+Builder:
+
+[source,java]
+----
+ProductAddedToCartEvent event = ProductAddedToCartEvent.builder()
+    .eventId("evt-002")
+    .eventType("cart.item.added")
+    .timestamp(Instant.now())
+    .userId("usr-42")
+    .sessionId("sess-xyz")
+    .correlationId("corr-abc")
+    .productId("prod-999")
+    .metadata(Map.of("quantity", 2))
+    .build();
+----
+
+=== `Product`
+
+Immutable value record with Builder.
+
+[cols="1,1,3"]
+|===
+|Field |Type |Description
+
+|`productId`
+|`String`
+|Unique product identifier
+
+|`sku`
+|`String`
+|Stock-keeping unit code
+
+|`name`
+|`String`
+|Display name
+
+|`slug`
+|`String`
+|URL-friendly identifier
+
+|`category`
+|`String`
+|Top-level category
+
+|`subCategory`
+|`String`
+|Sub-category
+
+|`brand`
+|`String`
+|Brand name
+
+|`price`
+|`BigDecimal`
+|Unit price
+
+|`priceCurrency`
+|`String`
+|ISO 4217 currency code (e.g. `USD`)
+
+|`inStock`
+|`boolean`
+|Stock availability flag
+
+|`inventoryCount`
+|`Long`
+|Units in stock
+
+|`ratingAverage`
+|`BigDecimal`
+|Mean customer rating
+
+|`ratingCount`
+|`BigInteger`
+|Number of ratings
+
+|`tags`
+|`Set<String>`
+|Searchable tags
+
+|`imageUrl`
+|`String`
+|Primary image URL
+|===
+
+=== `Context`
+
+Immutable value record with Builder. Captures page context at event time.
+
+[cols="1,1,3"]
+|===
+|Field |Type |Description
+
+|`pageId`
+|`String`
+|Identifier of the page the event occurred on
+
+|`position`
+|`Long`
+|Position of the product in a list or grid
+
+|`source`
+|`String`
+|Traffic source (e.g. `search`, `recommendation`)
+
+|`referrer`
+|`String`
+|HTTP referrer URL
+
+|`searchQuery`
+|`String`
+|Search term that led to this page (nullable)
+|===
+
+== Kafka Reference
+
+=== Topics
+
+[cols="1,2,1"]
+|===
+|Constant |Topic Name |Purpose
+
+|`Schema.Topics.CLICK_EVENT_RECEIVED`
+|`kafka-zen.lab-101.traffic-simulator.click-event.received`
+|Primary inbound topic
+
+|`Schema.Topics.CLICK_EVENT_DLQ`
+|`kafka-zen.lab-101.traffic-simulator.click-event.received.dlq`
+|Dead-letter queue for unprocessable messages
+|===
+
+Both topics are bootstrapped on startup by `KafkaTopicBootstrapper`.
+
+=== Message Format
+
+All messages use Jackson JSON. The type discriminator field is `eventType`.
+
+[source,json]
+----
+// ProductViewedEventMessage
+{
+  "eventId": "evt-001",
+  "eventType": "product.viewed",
+  "timestamp": "2026-01-01T12:00:00Z",
+  "userId": "usr-42",
+  "sessionId": "sess-xyz",
+  "correlationId": "corr-abc",
+  "partitionKey": "usr-42",
+  "product": { ... },
+  "context": { ... }
+}
+
+// ProductAddedToCartEventMessage
+{
+  "eventId": "evt-002",
+  "eventType": "cart.item.added",
+  "timestamp": "2026-01-01T12:01:00Z",
+  "userId": "usr-42",
+  "sessionId": "sess-xyz",
+  "correlationId": "corr-abc",
+  "partitionKey": "usr-42",
+  "productId": "prod-999",
+  "metadata": { "quantity": 2 }
+}
+----
+
+Deserialisation is configured via `spring.json.value.default.type` to
+`ClickEventMessage`; Jackson resolves the concrete subtype using `@JsonSubTypes`.
+
+=== Consumer Configuration
+
+[cols="1,2,2"]
+|===
+|Property |Default |Notes
+
+|`spring.kafka.bootstrap-servers`
+|`localhost:9092`
+|Override for non-local environments
+
+|`spring.kafka.consumer.group-id`
+|`kafka-zen-lab-102-consumer-api`
+|(inherits `spring.application.name`)
+
+|`spring.kafka.consumer.enable-auto-commit`
+|`false`
+|Manual ack via `Acknowledgment.acknowledge()`
+
+|`spring.kafka.consumer.key-deserializer`
+|`StringDeserializer`
+|
+
+|`spring.kafka.consumer.value-deserializer`
+|`JsonDeserializer`
+|Trusted packages: `zen.lab.*`
+
+|`spring.kafka.listener.ack-mode`
+|`MANUAL_IMMEDIATE`
+|Offset committed immediately on `acknowledge()`
+
+|`spring.kafka.listener.concurrency`
+|`5`
+|Concurrent listener threads
+
+|`spring.kafka.listener.missing-topics-fatal`
+|`false`
+|App starts even if topics don't exist yet
+|===
+
+=== Error Handling
+
+`KafkaConsumerConfiguration` registers a `DefaultErrorHandler` bean that Spring
+Boot auto-wires into the listener container factory.
+
+[cols="1,2"]
+|===
+|Setting |Value
+
+|Retry attempts
+|3
+
+|Back-off interval
+|1 000 ms (fixed)
+
+|Recovery action
+|Route raw bytes to `CLICK_EVENT_DLQ` via a dedicated producer factory
+
+|DLQ partition selection
+|`-1` (Kafka chooses partition)
+|===
+
+NOTE: The DLQ producer factory is not exposed as a bean to avoid shadowing
+Spring Boot's auto-configured `ProducerFactory<Object,Object>`.
+
+== Configuration Reference
+
+=== `application.*` Properties
+
+[cols="1,1,2"]
+|===
+|Property |Default |Description
+
+|`application.default-page-limit`
+|`25`
+|Default page size for pageable REST endpoints
+
+|`application.cors.allowed-origins`
+|`http://*.localhost`
+|CORS allowed-origins pattern
+|===
+
+=== Server
+
+[cols="1,1"]
+|===
+|Property |Value
+
+|`server.port`
+|`8080`
+
+|`server.servlet.context-path`
+|`/`
+|===
+
+=== OpenAPI / Swagger UI
+
+Available when the app is running:
+
+* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+* API docs JSON: `http://localhost:8080/api-docs`
+
+=== Actuator
+
+Health liveness/readiness probes enabled at the default actuator endpoints.
+
+== Developer Guide
+
 === Prerequisites
 
-* You must have Java 17 or higher installed to compile and run the project.
-* You must have Gradle 7.6.2 or higher installed to build the project.
+* Java 21 (defined in `.java-version`)
+* Gradle 8.13 or higher (or use the wrapper)
+* Docker (for Kafka and SonarQube)
 
 === First Steps
 
-The code generator does not create a Gradle wrapper; to create one:
+Create the Gradle wrapper if not present:
 
-```[shell]
+[source,shell]
+----
 gradle wrapper
-```
+----
 
-==== Compile the Code
+=== Common Tasks
 
-```[shell]
+==== Compile and test
+
+[source,shell]
+----
 ./gradlew build
-```
+----
 
-==== Build with Code Coverage
+==== Build with coverage and Sonar
 
-Update the ```gradle.properties``` file and
-set the `systemProp.sonar` properties to what's appropriate
-for your environment.  Then run this command:
+Update `gradle.properties` with your SonarQube coordinates, then:
 
-```[shell]
+[source,shell]
+----
 ./gradlew clean build sonar
-```
+----
 
-==== Change the Java Version
+==== Change the Java version
 
-The Java version is defined in the ```.java-version``` file in the
-project's root directory, with ```17``` being the default value.
-Simply change that number to use a different version of Java.
+Edit `.java-version` in the project root. Default is `21`.
 
+==== Build a Docker image
 
-==== Build a Docker Image
-
-```[shell]
+[source,shell]
+----
 ./gradlew jibDockerBuild
-```
+----
 
-==== Run the application in Docker
+==== Run in Docker
 
-```[shell]
-# build the docker image, if you haven't already
+[source,shell]
+----
+# Build the image first
 ./gradlew jibDockerBuild
 
-# navigate to the docker-compose subdirectory
+# Launch via Compose (starts Kafka and the app)
 cd docker-compose
-
-# run docker-compose to launch the container
 docker-compose up -d
-```
+----
 
-==== Check for the latest dependency updates
-Ben Manes' `versions` plugin is included in the `build.gradle` file.
-This plugin checks for new versions of any dependencies. To check, run
+==== Check for dependency updates
 
-```[shell]
+[source,shell]
+----
 ./gradlew dependencyUpdates
-```
-    ==== OpenAPI Documentation
+----
 
-    This project was generated with OpenAPI documentation enabled, which enables
-    viewing the OpenAPI documents for this application in your browser.  Simply
-    start the application locally (e.g., ```./gradlew bootRun```), then open
-    ()>
-        either of these links in your browser:
+=== Setting Up SonarQube
 
-    ```[bash]
-        http://localhost:8080//swagger-ui/index.html
-    http://localhost:8080//v3/api-docs
-    ```
+A local SonarQube container is the simplest option:
 
-==== Setting Up SonarQube
+[source,shell]
+----
+docker run -d --name sonarqube \
+  -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
+  -p 9000:9000 sonarqube:latest
+----
 
-Before code metrics can be exported to Sonarqube, the `gradle.properties` file
-in this project must be updated with configuration values that match your environment.class
+Alternatively use the https://hub.docker.com/r/bitnami/sonarqube[Bitnami image].
 
-A local Sonarqube Docker container can be used. Generally, this command will suffice:
+Login at `http://localhost:9000` (default `admin`/`admin`), change the password,
+then update `gradle.properties` with the new credentials before running
+`./gradlew clean build sonar`.
 
-```[shell]
-docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest
-```
+See https://docs.sonarqube.org/latest/setup/get-started-2-minutes/[Getting Started with SonarQube in 2 Minutes].
 
-Besides this default Sonarqube image, another good choice is the Bitnami image:
-https://hub.docker.com/r/bitnami/sonarqube[Bitnami Sonarqube on DockerHub]
+== Extending the Application
 
-Once Sonarqube is running, login to https://localhost:9000 using the provider's credentials
-(usually admin/admin for Sonarqube's image; admin/bitnami for Bitnami's image).
+=== Adding a New Event Type
 
-You will be prompted to change the default password.  Whatever new password you select, update the
-`gradle.properties` file with that password.  When that's done, the code metrics from this project can
-be exported to the Sonarqube Docker container.
+1. Add a new `eventType` value to `Schema` if needed.
+2. Create a concrete `ClickEventMessage` subclass (annotate with `@JsonSubTypes.Type`).
+3. Add the corresponding domain event implementing `ClickEvent`.
+4. Handle the new message type in `ClickEventMessageMapper.toDomain()`.
+5. Update `ClickEventProcessingService` or dispatch to a new use case as required.
 
-See
-https://docs.sonarqube.org/latest/setup/get-started-2-minutes/[Getting Started with Sonarqube in 2 Minutes]
-and https://hub.docker.com/_/sonarqube[Running Sonarqube in Docker]
+=== Replacing `InMemoryClickEventStore`
 
-for additional information.
-
-
+`InMemoryClickEventStore` is a stub. To persist events, implement `ClickEventStore`
+and register it as a Spring bean. Remove or qualify the stub bean.

@@ -10,6 +10,25 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Abstract base class for all Kafka click-event messages consumed from the
+ * {@code kafka-zen.lab-101.traffic-simulator.click-event.received} topic.
+ *
+ * <p>This class is the inbound DTO hierarchy root. Jackson resolves the concrete
+ * subtype at deserialisation time using the {@code eventType} JSON field, which is
+ * declared in {@code @JsonTypeInfo} and mapped to subtypes via {@code @JsonSubTypes}.
+ *
+ * <p>This class is sealed; the only permitted subtypes are:
+ * <ul>
+ *   <li>{@link ProductViewedEventMessage} — JSON {@code eventType = "product.viewed"}</li>
+ *   <li>{@link ProductAddedToCartEventMessage} — JSON {@code eventType = "cart.item.added"}</li>
+ * </ul>
+ *
+ * <p>The {@code userId}, {@code sessionId}, and {@code correlationId} fields are
+ * excluded from {@code toString()} to avoid inadvertent PII exposure in logs.
+ *
+ * <p>Instances are mapped to domain events by {@code ClickEventMessageMapper}.
+ */
 @Getter
 @SuperBuilder
 @AllArgsConstructor

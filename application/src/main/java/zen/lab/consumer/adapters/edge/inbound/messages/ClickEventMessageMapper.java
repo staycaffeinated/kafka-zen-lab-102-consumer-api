@@ -12,9 +12,31 @@ import zen.lab.consumer.domain.events.ProductViewedEvent;
 import zen.lab.consumer.domain.model.Context;
 import zen.lab.consumer.domain.model.Product;
 
+/**
+ * Maps inbound Kafka message objects to domain events.
+ *
+ * <p>This component sits between the Kafka adapter and the domain layer, translating
+ * the mutable, Jackson-annotated {@link ClickEventMessage} hierarchy into immutable
+ * domain records from the {@link zen.lab.consumer.domain.events} package.
+ *
+ * <p>The mapping is performed via a sealed-interface pattern match. Because
+ * {@code ClickEventMessage} is a sealed class and {@code ClickEvent} is a sealed
+ * interface, the compiler enforces exhaustiveness: adding a new message subtype
+ * without updating the {@code switch} expression causes a compile error.
+ */
 @Component
 public class ClickEventMessageMapper {
 
+    /**
+     * Maps the given {@link ClickEventMessage} to a domain {@link ClickEvent}.
+     *
+     * <p>Uses an exhaustive pattern-matching {@code switch} over the sealed
+     * {@code ClickEventMessage} hierarchy. The switch has no default branch;
+     * any unrecognised subtype will result in a compile error.
+     *
+     * @param message the inbound Kafka message; must not be null
+     * @return the corresponding domain event; never null
+     */
     public ClickEvent toDomain(ClickEventMessage message) {
         return switch (message) {
             case ProductViewedEventMessage m -> toProductViewedEvent(m);
