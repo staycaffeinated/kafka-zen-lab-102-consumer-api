@@ -23,14 +23,22 @@ import zen.lab.consumer.domain.events.ProductViewedEvent;
 @ExtendWith(MockitoExtension.class)
 class ClickEventMessageConsumerTest {
 
-    @Mock MessageConsumerUseCase messageConsumerUseCase;
-    @Mock ClickEventMessageMapper clickEventMessageMapper;
-    @Mock Acknowledgment acknowledgment;
+    @Mock
+    MessageConsumerUseCase messageConsumerUseCase;
 
-    @InjectMocks ClickEventMessageConsumer consumer;
+    @Mock
+    ClickEventMessageMapper clickEventMessageMapper;
 
-    private static final ClickEventMessage A_MESSAGE =
-            ProductViewedEventMessage.builder().eventId("evt-1").eventType("product.viewed").build();
+    @Mock
+    Acknowledgment acknowledgment;
+
+    @InjectMocks
+    ClickEventMessageConsumer consumer;
+
+    private static final ClickEventMessage A_MESSAGE = ProductViewedEventMessage.builder()
+            .eventId("evt-1")
+            .eventType("product.viewed")
+            .build();
 
     private static final ProductViewedEvent A_DOMAIN_EVENT =
             new ProductViewedEvent("evt-1", "product.viewed", null, null, null, null, null, null);
@@ -61,7 +69,9 @@ class ClickEventMessageConsumerTest {
         @Test
         void consume_doesNotAcknowledgeWhenUseCaseThrows() {
             when(clickEventMessageMapper.toDomain(A_MESSAGE)).thenReturn(A_DOMAIN_EVENT);
-            doThrow(new RuntimeException("processing failed")).when(messageConsumerUseCase).process(A_DOMAIN_EVENT);
+            doThrow(new RuntimeException("processing failed"))
+                    .when(messageConsumerUseCase)
+                    .process(A_DOMAIN_EVENT);
 
             assertThatThrownBy(() -> consumer.consume(aRecord(A_MESSAGE), acknowledgment))
                     .isInstanceOf(RuntimeException.class)
@@ -72,7 +82,9 @@ class ClickEventMessageConsumerTest {
 
         @Test
         void consume_doesNotAcknowledgeWhenMapperThrows() {
-            doThrow(new RuntimeException("deserialization failed")).when(clickEventMessageMapper).toDomain(A_MESSAGE);
+            doThrow(new RuntimeException("deserialization failed"))
+                    .when(clickEventMessageMapper)
+                    .toDomain(A_MESSAGE);
 
             assertThatThrownBy(() -> consumer.consume(aRecord(A_MESSAGE), acknowledgment))
                     .isInstanceOf(RuntimeException.class)

@@ -16,7 +16,7 @@ public class ClickEventMessageConsumer {
     private final ClickEventMessageMapper clickEventMessageMapper;
 
     @KafkaListener(topics = Schema.Topics.CLICK_EVENT_RECEIVED)
-    public void consume(ConsumerRecord<String,ClickEventMessage> consumerRecord, Acknowledgment acknowledgment) {
+    public void consume(ConsumerRecord<String, ClickEventMessage> consumerRecord, Acknowledgment acknowledgment) {
         messageConsumerUseCase.process(clickEventMessageMapper.toDomain(consumerRecord.value()));
         acknowledgment.acknowledge();
     }
