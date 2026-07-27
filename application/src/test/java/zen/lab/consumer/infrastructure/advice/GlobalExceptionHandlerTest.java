@@ -36,6 +36,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
+import zen.lab.consumer.application.exceptions.BadRequestException;
+import zen.lab.consumer.application.exceptions.ResourceNotFoundException;
 import zen.lab.consumer.application.exceptions.UnprocessableEntityException;
 
 /**
@@ -123,6 +125,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = exceptionHandlerUnderTest.handleSQLException(ex, mockWebRequest);
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assert response.getBody() != null;
         assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());
         assertThat(response.getBody().getTitle()).isNotEmpty();
     }
@@ -141,6 +144,32 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void onResourceNotFoundException_shouldReturnNotFound() {
+        ResourceNotFoundException exception = new ResourceNotFoundException("I am a fake exception");
+
+        ResponseEntity<ProblemDetail> response = exceptionHandlerUnderTest.handleResourceNotFoundException(exception);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assert response.getBody() != null;
+        assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getBody().getTitle()).isNotEmpty();
+    }
+
+    @Test
+    void onBadRequestException_shouldReturnBadRequest() {
+        BadRequestException exception = new BadRequestException("I am a fake exception");
+
+        ResponseEntity<ProblemDetail> response = exceptionHandlerUnderTest.handleBadRequestException(exception);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assert response.getBody() != null;
+        assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getBody().getTitle()).isNotEmpty();
+    }
+
+    @Test
     void whenUnprocessableEntityException_expectBadRequest() {
         var ex = Mockito.mock(UnprocessableEntityException.class);
         when(ex.getMessage()).thenReturn("A mock message");
@@ -148,6 +177,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = exceptionHandlerUnderTest.handleUnprocessableRequestException(ex);
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+        assert response.getBody() != null;
         assertThat(response.getBody().getTitle()).isNotBlank();
     }
 
