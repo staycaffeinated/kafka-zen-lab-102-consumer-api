@@ -46,7 +46,7 @@ public class KafkaConsumerConfiguration {
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
         var kafkaTemplate = new KafkaTemplate<>(dlqProducerFactory);
         var recoverer = new DeadLetterPublishingRecoverer(
-                kafkaTemplate, (record, ex) -> new TopicPartition(Schema.Topics.CLICK_EVENT_DLQ, -1));
+                kafkaTemplate, (consumerRecord, ex) -> new TopicPartition(Schema.Topics.CLICK_EVENT_DLQ, -1));
         return new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3));
     }
 }
