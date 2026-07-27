@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({TEST, INTEGRATION_TEST})
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
+@TestPropertySource(properties = "spring.kafka.listener.auto-startup=false")
 public abstract class AbstractIntegrationTest {
     @Autowired
     protected MockMvc mockMvc;
