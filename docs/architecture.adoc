@@ -1,0 +1,557 @@
+:toc: auto
+:toc-title: Contents
+:toclevels: 4
+
+= Architecture Reference
+kafka-zen-lab-102-consumer-api
+
+This document describes the architecture of the Kafka consumer API, the rationale behind key design decisions, and the rules that enforce those decisions at build time.
+
+== System Context
+
+The service is one node in the kafka-zen-lab series. It sits downstream of `kafka-zen-lab-101-traffic-simulator`, which produces synthetic click-stream events onto a Kafka topic. This service consumes those events, transforms them into domain objects, and hands them to persistence.
+
+[source,mermaid]
+----
+graph LR
+    SIM["kafka-zen-lab-101\ntraffic-simulator"]
+    TOPIC["Kafka Topic\nclick-event.received"]
+    APP["kafka-zen-lab-102\nconsumer-api"]
+    DLQ["Kafka Topic\nclick-event.received.dlq"]
+    STORE[("Event Store\n(pluggable)")]
+
+    SIM -->|JSON messages| TOPIC
+    TOPIC -->|KafkaListener| APP
+    APP -->|store| STORE
+    APP -->|failed after 3 retries| DLQ
+----
+
+== Architectural Style
+
+The application combines two complementary patterns.
+
+=== Hexagonal Architecture (Ports and Adapters)
+
+The domain core is shielded from all framework and infrastructure concerns by a ring of ports (Java interfaces) and adapters (concrete implementations). Nothing in the domain layer imports Spring, Kafka, Jackson, or any persistence technology.
+
+=== Clean Architecture Layers
+
+Four concentric layers enforce a strict inward dependency rule. Each outer layer may depend on inner layers; no inner layer may reference anything from an outer layer.
+
+[cols="1,2,3"]
+|===
+|Layer |Package Root |Responsibility
+
+|Domain
+|`zen.lab.consumer.domain`
+|Sealed event interfaces, value-object records, shared constants. Zero framework dependencies.
+
+|Application
+|`zen.lab.consumer.application`
+|Use-case interfaces (inbound ports), outbound port interfaces, application services, and exception types.
+
+|Adapters
+|`zen.lab.consumer.adapters`
+|Inbound Kafka listener and REST controller; outbound in-memory event store; validation annotations.
+
+|Infrastructure
+|`zen.lab.consumer.infrastructure`
+|Spring configuration beans, Jackson setup, CORS, error handler, resource-ID provider. Wires everything together.
+|===
+
+=== Dependency Rule Diagram
+
+[source,mermaid]
+----
+graph TD
+    subgraph Infrastructure["Infrastructure (outermost)"]
+        CFG[Spring Config Beans]
+        ADV[GlobalExceptionHandler]
+    end
+
+    subgraph Adapters
+        KLC[ClickEventMessageConsumer]
+        MAP[ClickEventMessageMapper]
+        RES[RootController]
+        STORE_IMPL[InMemoryClickEventStore]
+    end
+
+    subgraph Application
+        PORT_IN[MessageConsumerUseCase]
+        PORT_OUT[ClickEventStore\nResourceIdSupplier]
+        SVC[ClickEventProcessingService]
+    end
+
+    subgraph Domain["Domain (innermost)"]
+        EVT[ClickEvent sealed interface]
+        PVE[ProductViewedEvent]
+        PACE[ProductAddedToCartEvent]
+        PROD[Product]
+        CTX[Context]
+    end
+
+    Infrastructure --> Adapters
+    Infrastructure --> Application
+    Infrastructure --> Domain
+    Adapters --> Application
+    Adapters --> Domain
+    Application --> Domain
+
+    KLC --> PORT_IN
+    MAP --> EVT
+    SVC --> PORT_OUT
+    SVC --> EVT
+    STORE_IMPL --> PORT_OUT
+----
+
+=== ArchUnit Enforcement
+
+`ArchitectureTest` (in `src/test`) uses ArchUnit to assert the dependency rules at build time. The following rules are verified on every `./gradlew build`:
+
+[cols="1,3"]
+|===
+|Rule |Assertion
+
+|Domain isolation
+|No class in `domain` depends on `application`, `adapters`, or `infrastructure`
+
+|Application isolation
+|No class in `application` depends on `adapters` or `infrastructure`
+
+|Adapter/infrastructure separation
+|Adapters do not depend on infrastructure; infrastructure does not depend on adapters
+
+|Domain purity
+|No class in `domain` imports `org.springframework` or `jakarta.persistence`
+
+|Port contracts
+|All classes in `application.port.inbound` and `application.port.outbound` are interfaces
+
+|Controller placement
+|`@RestController` classes reside in `adapters..inbound` and are suffixed `Controller`
+
+|Advice placement
+|`@ControllerAdvice` classes reside in `infrastructure.advice`
+
+|Service placement
+|`@Service` classes reside in `application.service`
+
+|Kafka listener placement
+|Methods annotated `@KafkaListener` are declared in classes inside `adapters`
+
+|No field injection
+|`@Autowired` on fields is prohibited throughout the codebase
+
+|Naming: configurations
+|`@Configuration` classes in `infrastructure.config` are suffixed `Configuration`
+
+|Naming: exceptions
+|All `Exception` subclasses are suffixed `Exception`
+|===
+
+== Component Diagram
+
+[source,mermaid]
+----
+graph TB
+    subgraph "Inbound Adapters"
+        CONSUMER[ClickEventMessageConsumer\n@KafkaListener]
+        MAPPER[ClickEventMessageMapper]
+        ROOT[RootController\nGET /]
+        BOOT[KafkaTopicBootstrapper\n@!test profile]
+        VAL[Validation\n@Alphabetic @ResourceId @SearchText]
+    end
+
+    subgraph "Message Model"
+        CEM[ClickEventMessage\nabstract sealed]
+        PVEM[ProductViewedEventMessage]
+        PACEM[ProductAddedToCartEventMessage]
+        PRODM[ProductMessage]
+        CTXM[ContextMessage]
+    end
+
+    subgraph "Application"
+        UCi[MessageConsumerUseCase\ninbound port]
+        UCo1[ClickEventStore\noutbound port]
+        UCo2[ResourceIdSupplier\noutbound port]
+        PROC[ClickEventProcessingService\n@Service]
+    end
+
+    subgraph "Domain"
+        CE[ClickEvent\nsealed interface]
+        PVE_D[ProductViewedEvent\nrecord]
+        PACE_D[ProductAddedToCartEvent\nrecord]
+        PROD_D[Product\nrecord]
+        CTX_D[Context\nrecord]
+    end
+
+    subgraph "Outbound Adapters"
+        IMCES[InMemoryClickEventStore\nstub]
+    end
+
+    subgraph "Infrastructure"
+        KAFKA_ERR[KafkaConsumerConfiguration\nDefaultErrorHandler / DLQ]
+        GEH[GlobalExceptionHandler\nRFC-7807]
+        RID[ResourceIdGenerator\nSecureRandom DRBG]
+        JACK[JacksonConfiguration\nJsonMapper]
+        WEB[WebMvcConfiguration\nCORS]
+        PROPS[ApplicationProperties\n@ConfigurationProperties]
+        SCHEMA[Schema\nTopic constants]
+    end
+
+    CONSUMER -->|ConsumerRecord| MAPPER
+    MAPPER -->|ClickEvent| UCi
+    UCi --> PROC
+    PROC --> UCo1
+    UCo1 --> IMCES
+
+    CEM --> PVEM
+    CEM --> PACEM
+    PVEM --> PRODM
+    PVEM --> CTXM
+
+    MAPPER --> PVEM
+    MAPPER --> PACEM
+
+    PROC --> CE
+    PVE_D -.->|implements| CE
+    PACE_D -.->|implements| CE
+----
+
+== Kafka Message Flow
+
+[source,mermaid]
+----
+sequenceDiagram
+    participant Producer as Traffic Simulator
+    participant Kafka as Kafka Broker
+    participant Consumer as ClickEventMessageConsumer
+    participant Mapper as ClickEventMessageMapper
+    participant Service as ClickEventProcessingService
+    participant Store as ClickEventStore
+    participant DLQ as Dead Letter Queue
+
+    Producer->>Kafka: JSON message (eventType discriminator)
+    Kafka->>Consumer: ConsumerRecord<String, ClickEventMessage>
+    Note over Consumer: Jackson resolves subtype via @JsonSubTypes
+    Consumer->>Mapper: toDomain(ClickEventMessage)
+    alt ProductViewedEventMessage
+        Mapper->>Mapper: toProductViewedEvent()
+    else ProductAddedToCartEventMessage
+        Mapper->>Mapper: toProductAddedToCartEvent()
+    end
+    Mapper-->>Consumer: ClickEvent (domain object)
+    Consumer->>Service: process(ClickEvent)
+    Service->>Store: store(ClickEvent)
+    Store-->>Service: void
+    Consumer->>Kafka: acknowledgment.acknowledge()
+
+    alt Processing failure (up to 3 retries)
+        Consumer->>Consumer: retry with 1s fixed backoff
+        Consumer->>DLQ: raw bytes via DeadLetterPublishingRecoverer
+    end
+----
+
+== Domain Model
+
+=== Type Hierarchy
+
+[source,mermaid]
+----
+classDiagram
+    class ClickEvent {
+        <<sealed interface>>
+        +String eventId()
+        +String eventType()
+        +Instant timestamp()
+        +String userId()
+        +String sessionId()
+        +String correlationId()
+    }
+
+    class ProductViewedEvent {
+        <<record>>
+        +Product product()
+        +Context context()
+        +static Builder builder()
+    }
+
+    class ProductAddedToCartEvent {
+        <<record>>
+        +String productId()
+        +Map~String,Serializable~ metadata()
+        +static Builder builder()
+    }
+
+    class Product {
+        <<record>>
+        +String productId()
+        +String sku()
+        +String name()
+        +String slug()
+        +String category()
+        +String subCategory()
+        +String brand()
+        +BigDecimal price()
+        +String priceCurrency()
+        +boolean inStock()
+        +Long inventoryCount()
+        +BigDecimal ratingAverage()
+        +BigInteger ratingCount()
+        +Set~String~ tags()
+        +String imageUrl()
+        +static Builder builder()
+    }
+
+    class Context {
+        <<record>>
+        +String pageId()
+        +Long position()
+        +String source()
+        +String referrer()
+        +String searchQuery()
+        +static Builder builder()
+    }
+
+    ClickEvent <|.. ProductViewedEvent : permits
+    ClickEvent <|.. ProductAddedToCartEvent : permits
+    ProductViewedEvent *-- Product
+    ProductViewedEvent *-- Context
+----
+
+=== Design Decisions
+
+The domain types are Java records, which enforces immutability by construction. Custom `Builder` inner classes are provided on each record so that test code and future factory methods can assemble instances without relying on constructor argument position. The `ClickEvent` sealed interface restricts the permitted subtypes to exactly `ProductViewedEvent` and `ProductAddedToCartEvent`, enabling exhaustive pattern matching in `ClickEventMessageMapper.toDomain()` without a default branch.
+
+== Inbound Kafka Adapter
+
+=== Message Type Discrimination
+
+Kafka delivers raw JSON bytes. Spring Kafka's `JsonDeserializer` is configured with:
+
+* `spring.json.value.default.type` = `ClickEventMessage` (the abstract sealed base class)
+* `spring.json.trusted.packages` = `zen.lab.*`
+
+Jackson resolves the concrete subtype at deserialisation time using the `eventType` field, which is declared in `@JsonTypeInfo` on `ClickEventMessage`. The two permitted subtypes are registered via `@JsonSubTypes`.
+
+=== Acknowledgement Mode
+
+The listener runs with `MANUAL_IMMEDIATE` ack-mode. The consumer commits the offset only after `messageConsumerUseCase.process(...)` returns successfully. If processing raises an exception before `acknowledgment.acknowledge()` is called, the `DefaultErrorHandler` intercepts it, retries up to three times with a one-second fixed back-off, then publishes the raw bytes to the dead-letter topic.
+
+=== Dead-Letter Queue
+
+The `DefaultErrorHandler` bean in `KafkaConsumerConfiguration` creates an isolated producer factory (not exposed as a Spring bean) to avoid displacing Spring Boot's auto-configured `ProducerFactory<Object,Object>`. The DLQ producer serialises with `ByteArraySerializer` and uses partition `-1` to let the broker select the target partition.
+
+== REST Adapter
+
+The REST surface is minimal. `RootController` exposes a single health-check endpoint:
+
+[cols="1,1,2"]
+|===
+|Method |Path |Description
+
+|`GET`
+|`/`
+|Returns HTTP 200 with no body. Used as a liveness indicator.
+|===
+
+Swagger UI and the OpenAPI JSON document are available while the application is running:
+
+* `http://localhost:8080/swagger-ui/index.html`
+* `http://localhost:8080/api-docs`
+
+=== Error Handling
+
+`GlobalExceptionHandler` (`@ControllerAdvice`) converts exceptions to RFC-7807 Problem/JSON responses. The handler is registered in the `infrastructure.advice` package in accordance with the ArchUnit placement rule.
+
+[cols="2,1,2"]
+|===
+|Exception |HTTP Status |Notes
+
+|`BadRequestException`
+|400
+|Client-authored request errors
+
+|`ResourceNotFoundException`
+|404
+|Domain entity not found
+
+|`jakarta.persistence.EntityNotFoundException`
+|422
+|JPA entity not found (treated as unprocessable)
+
+|`UnprocessableEntityException`
+|422
+|Well-formed request that cannot be processed
+
+|`DataIntegrityViolationException`
+|422
+|Database constraint violation
+
+|`ConstraintViolationException`
+|400
+|Bean Validation failures; violations serialised to a JSON array in the response body
+
+|`MethodArgumentTypeMismatchException`
+|422
+|Path or query parameter type mismatch
+
+|`MissingServletRequestParameterException`
+|400 (delegated to parent)
+|Required parameter absent
+
+|`SQLException`
+|503
+|Database communication errors
+
+|`RuntimeException`
+|500
+|Catch-all for unhandled exceptions
+|===
+
+== Validation Annotations
+
+Three custom Bean Validation constraints are defined in `adapters.edge.inbound.validation`. They are intended for use on REST path variables and request body fields in future controllers.
+
+[cols="1,2,2"]
+|===
+|Annotation |Validator |Rule
+
+|`@Alphabetic`
+|`AlphabeticValidator`
+|All characters must satisfy `Character::isAlphabetic`. Rejects spaces, digits, and punctuation.
+
+|`@ResourceId`
+|`ResourceIdValidator`
+|Exactly 27 alphanumeric characters, matching the format produced by `ResourceIdGenerator`.
+
+|`@SearchText`
+|`SearchTextValidator`
+|Nullable or empty values pass. Non-empty values must not exceed 24 characters.
+|===
+
+Validation messages are externalised in `src/main/resources/ValidationMessages.properties`.
+
+== Infrastructure Configuration
+
+[cols="2,3"]
+|===
+|Class |Responsibility
+
+|`ApplicationProperties`
+|`@ConfigurationProperties(prefix = "application")` record binding `default-page-limit` and `cors.allowed-origins`.
+
+|`JacksonConfiguration`
+|Produces a primary `JsonMapper` bean with all available modules registered via `findAndAddModules()`.
+
+|`KafkaAdminConfiguration`
+|Enables Kafka with `@EnableKafka`; `KafkaAdmin` is auto-configured from `spring.kafka.admin.*`.
+
+|`KafkaConsumerConfiguration`
+|Configures the `DefaultErrorHandler` bean — retries and DLQ routing.
+
+|`KafkaProducerConfiguration`
+|Marker configuration class; producer is fully auto-configured from `spring.kafka.producer.*`.
+
+|`WebMvcConfiguration`
+|Adds CORS mappings from `ApplicationProperties.cors().allowedOrigins()`.
+
+|`ResourceIdSupplierConfiguration`
+|Registers a `ResourceIdGenerator` as the `ResourceIdSupplier` bean.
+
+|`DateTimeFormatConfiguration`
+|Configures date/time format for the application.
+
+|`LocalDateConverter`
+|Type converter for `LocalDate` string representations.
+|===
+
+== Resource ID Generation
+
+`ResourceIdGenerator` implements `ResourceIdSupplier` and produces 27-character alphanumeric strings using a `SecureRandom` DRBG instance. The design gives 160-bit entropy — consistent with the upper bound of the OAuth2 recommendation — and uses only URL-safe characters from the RFC 1738 alphabet.
+
+The 27-character length constant is centralised in `ResourceIdFormat.RESOURCE_ID_LENGTH` and is referenced by both the generator and `ResourceIdValidator`, ensuring the producer and validator always agree on the expected format.
+
+== Build System
+
+The project is a Gradle multi-project build with a single application subproject. Convention plugins live under `gradle/plugins/java-conventions/` and are applied via the `buildlogic.*` namespace.
+
+[cols="2,3"]
+|===
+|Convention Plugin |Effect
+
+|`buildlogic.java-conventions`
+|Java toolchain (reads `.java-version`), `-Xlint:unchecked` compiler flag, transitive source sharing for aggregated JaCoCo.
+
+|`buildlogic.application-conventions`
+|Pulls in `java-conventions` plus application-specific defaults.
+
+|`buildlogic.integration-test`
+|Adds an `integrationTest` source set with its own JaCoCo report.
+
+|`buildlogic.jacoco`
+|Configures per-subproject JaCoCo execution data.
+
+|`buildlogic.sonar-jacoco`
+|Wires JaCoCo XML reports into SonarQube analysis.
+
+|`buildlogic.spotless`
+|Code formatting enforcement (Spotless).
+
+|`buildlogic.lint`
+|Nebula lint for dependency hygiene.
+
+|`buildlogic.docker`
+|Jib configuration base.
+
+|`buildlogic.testing`
+|JUnit 5, Mockito agent, assertion libraries.
+|===
+
+=== Container Image
+
+Jib builds a multi-platform OCI image without a local Docker daemon:
+
+* Base image: `eclipse-temurin:21-jre-jammy`
+* Target platforms: `linux/arm64`, `linux/amd64`
+* Image name: `kafka-zen-lab-102-consumer-api:latest` (and version tag)
+
+== Testing Strategy
+
+[cols="1,2,2"]
+|===
+|Test Type |Location |Notes
+
+|Unit tests
+|`src/test/java`
+|Fast, no Spring context. Mockito agent enabled via JVM arg. ArchUnit tests run here.
+
+|Integration tests
+|`src/integrationTest/java`
+|`@SpringBootTest(webEnvironment = RANDOM_PORT)` against `AbstractIntegrationTest`. Kafka auto-startup disabled via `spring.kafka.listener.auto-startup=false`. Active profiles: `test` and `integration-test`.
+
+|Architecture tests
+|`src/test/java/zen/lab/consumer/ArchitectureTest`
+|ArchUnit assertions on the compiled class graph. Runs as part of the unit test suite.
+|===
+
+JaCoCo collects coverage from both the unit and integration test suites. The two reports are aggregated at the root project level and forwarded to SonarQube.
+
+== Extending the Application
+
+=== Adding a New Event Type
+
+. Add the new `eventType` string constant to `Schema` if it must be referenced elsewhere.
+. Create a concrete subclass of `ClickEventMessage` (annotated with `@JsonSubTypes.Type` on the base class).
+. Add a new record implementing `ClickEvent` in `domain.events`.
+. Add a mapping branch in `ClickEventMessageMapper.toDomain()`. The compiler will warn on the exhaustive `switch` if the new sealed subtype is not handled.
+. Add or extend the use-case service as needed.
+
+=== Replacing `InMemoryClickEventStore`
+
+`InMemoryClickEventStore` is a development stub that logs and discards events. To persist events:
+
+. Implement `ClickEventStore` in a new class under `adapters.edge.outbound.persistence` (or a new persistence subpackage).
+. Register it as a Spring bean (e.g., `@Component`).
+. Remove or qualify the stub bean to avoid ambiguity.
+. Add integration tests covering the new implementation.
