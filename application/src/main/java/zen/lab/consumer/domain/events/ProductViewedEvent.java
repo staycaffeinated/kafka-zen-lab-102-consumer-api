@@ -1,6 +1,7 @@
 package zen.lab.consumer.domain.events;
 
 import java.time.Instant;
+import org.jspecify.annotations.NonNull;
 import zen.lab.consumer.domain.model.Context;
 import zen.lab.consumer.domain.model.Product;
 
@@ -16,6 +17,7 @@ public record ProductViewedEvent(
         implements ClickEvent {
 
     @Override
+    @NonNull
     public String toString() {
         return "ProductViewedEvent[eventId=" + eventId + ", eventType=" + eventType + ", timestamp=" + timestamp
                 + ", product=" + product + ", context=" + context + "]";
