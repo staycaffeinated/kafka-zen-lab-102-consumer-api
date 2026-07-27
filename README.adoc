@@ -26,7 +26,13 @@ Spring Boot Kafka consumer that ingests click-stream events produced by
 |Gradle multi-project with custom convention plugins
 
 |Container
-|Jib → OCI image (`kafka-zen-lab-102-consumer-api:latest`)
+|Jib -> OCI image (`kafka-zen-lab-102-consumer-api:latest`)
+
+|API docs
+|SpringDoc / OpenAPI 3 (Swagger UI at `/swagger-ui/index.html`)
+
+|Code quality
+|ArchUnit (architecture rules), Spotless (formatting), Nebula Lint (dependency hygiene), JaCoCo (coverage), SonarQube
 |===
 
 === What It Does
@@ -36,9 +42,13 @@ Spring Boot Kafka consumer that ingests click-stream events produced by
 3. Maps the message to a domain `ClickEvent`
 4. Passes the event to `ClickEventProcessingService`, which persists it via `ClickEventStore`
 5. Acknowledges the Kafka offset (manual ack)
-6. On failure: retries 3× with 1 s back-off, then routes to the DLQ
+6. On failure: retries 3x with 1 s back-off, then routes to the DLQ
 
 == Architecture
+
+See link:docs/architecture.adoc[docs/architecture.adoc] for the full architecture reference, including component diagrams, sequence diagrams, ArchUnit rule table, and extension guide.
+
+=== Layer Summary
 
 ----
 Inbound Adapters              Application Layer               Outbound Adapters
@@ -55,16 +65,22 @@ ClickEventMessageMapper       ClickEventProcessingService ──► InMemoryClic
 |Package |Responsibility
 
 |`adapters.edge.inbound.messages`
-|Kafka listener, message mapper, message model, Serde
+|Kafka listener, message mapper, message model, Serde, topic bootstrapper
 
 |`adapters.edge.inbound.rest`
-|Health/root REST endpoint
+|Health/root REST endpoint (`GET /`)
 
 |`adapters.edge.inbound.validation`
 |Custom Bean Validation constraints (`@Alphabetic`, `@ResourceId`, `@SearchText`)
 
 |`adapters.edge.outbound.persistence`
 |`InMemoryClickEventStore` (stub; replace with real store)
+
+|`adapters.shared.profiles`
+|Spring profile name constants (`prod`, `test`, `integration-test`)
+
+|`application.exceptions`
+|`BadRequestException`, `ResourceNotFoundException`, `UnprocessableEntityException`
 
 |`application.port.inbound`
 |`MessageConsumerUseCase` — inbound port
@@ -81,8 +97,17 @@ ClickEventMessageMapper       ClickEventProcessingService ──► InMemoryClic
 |`domain.model`
 |`Context`, `Product` value records
 
+|`domain.shared`
+|`ResourceIdFormat` — resource-ID length constant
+
+|`infrastructure.advice`
+|`GlobalExceptionHandler` — RFC-7807 Problem/JSON error responses
+
 |`infrastructure.config`
-|Spring configuration beans (Kafka, Jackson, CORS, etc.)
+|Spring configuration beans (Kafka, Jackson, CORS, ResourceIdSupplier, etc.)
+
+|`infrastructure.providers`
+|`ResourceIdGenerator` — 160-bit DRBG-based ID generation
 |===
 
 == Domain Model Reference
@@ -292,6 +317,61 @@ Immutable value record with Builder. Captures page context at event time.
 |Search term that led to this page (nullable)
 |===
 
+== REST API Reference
+
+=== Endpoints
+
+[cols="1,1,2,1"]
+|===
+|Method |Path |Description |Response
+
+|`GET`
+|`/`
+|Liveness check
+|200 (empty body)
+|===
+
+=== OpenAPI / Swagger UI
+
+Available when the app is running:
+
+* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+* API docs JSON: `http://localhost:8080/api-docs`
+
+=== Error Responses (RFC-7807)
+
+All error responses use `application/problem+json`. Example:
+
+[source,json]
+----
+{
+  "type": "about:blank",
+  "title": "The requested resource was not found",
+  "status": 404,
+  "detail": "Product evt-001 does not exist"
+}
+----
+
+[cols="2,1"]
+|===
+|Condition |HTTP Status
+
+|Bad request / invalid input
+|400
+
+|Resource not found
+|404
+
+|Unprocessable entity / constraint violation
+|422
+
+|Database unavailable
+|503
+
+|Unexpected server error
+|500
+|===
+
 == Kafka Reference
 
 === Topics
@@ -309,7 +389,7 @@ Immutable value record with Builder. Captures page context at event time.
 |Dead-letter queue for unprocessable messages
 |===
 
-Both topics are bootstrapped on startup by `KafkaTopicBootstrapper`.
+Both topics are bootstrapped on startup by `KafkaTopicBootstrapper` (disabled in the `test` profile).
 
 === Message Format
 
@@ -383,7 +463,7 @@ Deserialisation is configured via `spring.json.value.default.type` to
 
 |`spring.kafka.listener.missing-topics-fatal`
 |`false`
-|App starts even if topics don't exist yet
+|App starts even if topics do not exist yet
 |===
 
 === Error Handling
@@ -441,16 +521,20 @@ Spring Boot's auto-configured `ProducerFactory<Object,Object>`.
 |`/`
 |===
 
-=== OpenAPI / Swagger UI
-
-Available when the app is running:
-
-* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-* API docs JSON: `http://localhost:8080/api-docs`
-
 === Actuator
 
 Health liveness/readiness probes enabled at the default actuator endpoints.
+
+[cols="1,2"]
+|===
+|Endpoint |Path
+
+|Liveness
+|`/actuator/health/liveness`
+
+|Readiness
+|`/actuator/health/readiness`
+|===
 
 == Developer Guide
 
@@ -505,10 +589,12 @@ Edit `.java-version` in the project root. Default is `21`.
 # Build the image first
 ./gradlew jibDockerBuild
 
-# Launch via Compose (starts Kafka and the app)
-cd docker-compose
+# Launch via Compose (starts the app; connect to an external Kafka broker)
+cd docker
 docker-compose up -d
 ----
+
+NOTE: The `docker/docker-compose.yml` starts only the application container. You need a running Kafka broker accessible at `localhost:9092` (or configure `spring.kafka.bootstrap-servers` via an environment variable).
 
 ==== Check for dependency updates
 
@@ -517,36 +603,59 @@ docker-compose up -d
 ./gradlew dependencyUpdates
 ----
 
-=== Setting Up SonarQube
-
-A local SonarQube container is the simplest option:
+==== Run only architecture tests
 
 [source,shell]
 ----
-docker run -d --name sonarqube \
-  -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
-  -p 9000:9000 sonarqube:latest
+./gradlew test --tests zen.lab.consumer.ArchitectureTest
 ----
 
-Alternatively use the https://hub.docker.com/r/bitnami/sonarqube[Bitnami image].
+=== Spring Profiles
 
-Login at `http://localhost:9000` (default `admin`/`admin`), change the password,
-then update `gradle.properties` with the new credentials before running
-`./gradlew clean build sonar`.
+[cols="1,3"]
+|===
+|Profile |Purpose
 
-See https://docs.sonarqube.org/latest/setup/get-started-2-minutes/[Getting Started with SonarQube in 2 Minutes].
+|_(none)_
+|Default configuration; connects to Kafka at `localhost:9092`
+
+|`local`
+|Placeholder profile; currently identical to default. Add local overrides to `application-local.yml`.
+
+|`test`
+|Activated in unit test suites; disables Kafka auto-startup to prevent real broker connections.
+
+|`integration-test`
+|Activated alongside `test` in `AbstractIntegrationTest`; Kafka listener auto-startup is disabled via `spring.kafka.listener.auto-startup=false`.
+
+|`prod`
+|Production profile constant defined in `SpringProfiles`; activate to apply production-specific beans.
+|===
 
 == Extending the Application
 
 === Adding a New Event Type
 
 1. Add a new `eventType` value to `Schema` if needed.
-2. Create a concrete `ClickEventMessage` subclass (annotate with `@JsonSubTypes.Type`).
-3. Add the corresponding domain event implementing `ClickEvent`.
-4. Handle the new message type in `ClickEventMessageMapper.toDomain()`.
+2. Create a concrete `ClickEventMessage` subclass (annotate with `@JsonSubTypes.Type` on `ClickEventMessage`).
+3. Add the corresponding domain event record implementing `ClickEvent`.
+4. Handle the new message type in `ClickEventMessageMapper.toDomain()`. The sealed-interface `switch` will be a compile error if the branch is missing.
 5. Update `ClickEventProcessingService` or dispatch to a new use case as required.
 
 === Replacing `InMemoryClickEventStore`
 
-`InMemoryClickEventStore` is a stub. To persist events, implement `ClickEventStore`
-and register it as a Spring bean. Remove or qualify the stub bean.
+`InMemoryClickEventStore` is a stub that logs the event ID and discards the payload. To persist events:
+
+1. Implement `ClickEventStore` in a new class (e.g., in `adapters.edge.outbound.persistence`).
+2. Annotate it with `@Component` (or register it in a `@Configuration` class).
+3. Remove or qualify the stub bean to avoid ambiguity.
+4. Add integration tests covering the new implementation.
+
+=== Adding a Custom Validator
+
+Validators follow the pattern in `adapters.edge.inbound.validation`:
+
+1. Define a constraint annotation implementing `@Constraint(validatedBy = ...)`.
+2. Implement `ConstraintValidator<YourAnnotation, YourType>`.
+3. Externalise the default message in `ValidationMessages.properties`.
+4. Apply the annotation to fields, method parameters, or type uses.
