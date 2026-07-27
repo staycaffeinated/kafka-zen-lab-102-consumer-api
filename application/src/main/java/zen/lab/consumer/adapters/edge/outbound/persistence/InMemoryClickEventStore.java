@@ -14,6 +14,6 @@ public class InMemoryClickEventStore implements ClickEventStore {
 
     @Override
     public void store(ClickEvent event) {
-        log.debug("Stored event: {}", event.getEventId());
+        log.debug("Stored event: {}", event.eventId());
     }
 }

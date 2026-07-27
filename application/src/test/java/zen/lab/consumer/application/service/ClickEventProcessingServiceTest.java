@@ -25,7 +25,7 @@ class ClickEventProcessingServiceTest {
 
     @Test
     void process_delegatesToStore() {
-        var event = ProductViewedEvent.builder().eventId("evt-1").build();
+        var event = new ProductViewedEvent("evt-1", null, null, null, null, null, null, null);
 
         service.process(event);
 
