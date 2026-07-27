@@ -37,17 +37,49 @@ public record ProductViewedEvent(
 
         private Builder() {}
 
-        public Builder eventId(String eventId) { this.eventId = eventId; return this; }
-        public Builder eventType(String eventType) { this.eventType = eventType; return this; }
-        public Builder timestamp(Instant timestamp) { this.timestamp = timestamp; return this; }
-        public Builder userId(String userId) { this.userId = userId; return this; }
-        public Builder sessionId(String sessionId) { this.sessionId = sessionId; return this; }
-        public Builder correlationId(String correlationId) { this.correlationId = correlationId; return this; }
-        public Builder product(Product product) { this.product = product; return this; }
-        public Builder context(Context context) { this.context = context; return this; }
+        public Builder eventId(String eventId) {
+            this.eventId = eventId;
+            return this;
+        }
+
+        public Builder eventType(String eventType) {
+            this.eventType = eventType;
+            return this;
+        }
+
+        public Builder timestamp(Instant timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        public Builder sessionId(String sessionId) {
+            this.sessionId = sessionId;
+            return this;
+        }
+
+        public Builder correlationId(String correlationId) {
+            this.correlationId = correlationId;
+            return this;
+        }
+
+        public Builder product(Product product) {
+            this.product = product;
+            return this;
+        }
+
+        public Builder context(Context context) {
+            this.context = context;
+            return this;
+        }
 
         public ProductViewedEvent build() {
-            return new ProductViewedEvent(eventId, eventType, timestamp, userId, sessionId, correlationId, product, context);
+            return new ProductViewedEvent(
+                    eventId, eventType, timestamp, userId, sessionId, correlationId, product, context);
         }
     }
 }

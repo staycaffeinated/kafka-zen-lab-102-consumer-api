@@ -1,25 +1,38 @@
 package zen.lab.consumer.domain.events;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import zen.lab.consumer.domain.model.Context;
 import zen.lab.consumer.domain.model.Product;
-
-import java.time.Instant;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class ProductViewedEventTest {
 
     @Test
     void toStringMustNotRevealPersonallyIdentifiableInformation() {
-        var product = new Product("product-123", null, "Product Name", null, null, null, null,
-                null, null, true, null, null, null, null, null);
+        var product = new Product(
+                "product-123",
+                null,
+                "Product Name",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null);
         var context = new Context("home-page", null, "web", null, null);
 
         var event = ProductViewedEvent.builder()
                 .eventId("event-123")
                 .eventType("PRODUCT_VIEWED")
-                .timestamp(Instant.now())
+                .timestamp(Instant.parse("2026-01-01T00:00:00Z"))
                 .userId("user-123")
                 .sessionId("session-123")
                 .correlationId("correlation-123")
@@ -32,5 +45,4 @@ class ProductViewedEventTest {
                 .doesNotContain("session-123")
                 .doesNotContain("correlation-123");
     }
-
 }
