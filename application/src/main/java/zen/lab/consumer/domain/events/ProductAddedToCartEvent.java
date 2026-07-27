@@ -1,18 +1,23 @@
 package zen.lab.consumer.domain.events;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Map;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
-@Getter
-@SuperBuilder
-@NoArgsConstructor
-@ToString(callSuper = true)
-public final class ProductAddedToCartEvent extends ClickEvent {
+public record ProductAddedToCartEvent(
+        String eventId,
+        String eventType,
+        Instant timestamp,
+        String userId,
+        String sessionId,
+        String correlationId,
+        String productId,
+        Map<String, Serializable> metadata)
+        implements ClickEvent {
 
-    private String productId;
-    private Map<String, Serializable> metadata;
+    @Override
+    public String toString() {
+        return "ProductAddedToCartEvent[eventId=" + eventId + ", eventType=" + eventType + ", timestamp=" + timestamp
+                + ", productId=" + productId + "]";
+    }
 }
