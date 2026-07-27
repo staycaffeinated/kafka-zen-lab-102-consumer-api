@@ -14,6 +14,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.TopicBuilder;
@@ -22,15 +23,17 @@ import org.springframework.kafka.core.KafkaAdmin;
 /*
  * Creates standard topics on startup. Auto-creating topics is acceptable for local development.
  * Production environments should use Kubernetes, Terraform, or equivalent tooling.
+ * Disabled in the test profile to prevent integration tests from connecting to Kafka.
  */
 @Configuration
 @EnableKafka
+@Profile("!test")
 @Slf4j
-public class TopicProvisioner {
+public class KafkaTopicBootstrapper {
 
     private final KafkaAdmin kafkaAdmin;
 
-    public TopicProvisioner(KafkaAdmin kafkaAdmin) {
+    public KafkaTopicBootstrapper(KafkaAdmin kafkaAdmin) {
         this.kafkaAdmin = kafkaAdmin;
     }
 

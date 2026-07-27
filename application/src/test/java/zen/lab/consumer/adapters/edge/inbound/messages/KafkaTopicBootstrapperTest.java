@@ -1,4 +1,4 @@
-package zen.lab.consumer.infrastructure.kafka;
+package zen.lab.consumer.adapters.edge.inbound.messages;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,16 +18,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.kafka.core.KafkaAdmin;
-import zen.lab.consumer.adapters.edge.inbound.messages.TopicProvisioner;
 
-class TopicProvisionerTest {
+class KafkaTopicBootstrapperTest {
 
     private KafkaAdmin kafkaAdmin;
     private AdminClient adminClient;
     private KafkaFuture<Void> kafkaFuture;
     private MockedStatic<AdminClient> mockedAdminClient;
 
-    private TopicProvisioner topicProvisioner;
+    private KafkaTopicBootstrapper kafkaTopicBootstrapper;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
@@ -44,7 +43,7 @@ class TopicProvisionerTest {
         mockedAdminClient = mockStatic(AdminClient.class);
         mockedAdminClient.when(() -> AdminClient.create(any(Map.class))).thenReturn(adminClient);
 
-        topicProvisioner = new TopicProvisioner(kafkaAdmin);
+        kafkaTopicBootstrapper = new KafkaTopicBootstrapper(kafkaAdmin);
     }
 
     @AfterEach
@@ -60,7 +59,7 @@ class TopicProvisionerTest {
         void givenAllTopicsCreated_thenCompletesWithoutException() throws Exception {
             when(kafkaFuture.get(30, TimeUnit.SECONDS)).thenReturn(null);
 
-            topicProvisioner.createTopics();
+            kafkaTopicBootstrapper.createTopics();
 
             verify(adminClient).createTopics(any());
         }
@@ -74,7 +73,7 @@ class TopicProvisionerTest {
             ExecutionException ex = new ExecutionException(new TopicExistsException("topic already exists"));
             when(kafkaFuture.get(30, TimeUnit.SECONDS)).thenThrow(ex);
 
-            topicProvisioner.createTopics();
+            kafkaTopicBootstrapper.createTopics();
 
             verify(adminClient).createTopics(any());
         }
@@ -84,7 +83,7 @@ class TopicProvisionerTest {
             ExecutionException ex = new ExecutionException(new RuntimeException("broker unavailable"));
             when(kafkaFuture.get(30, TimeUnit.SECONDS)).thenThrow(ex);
 
-            topicProvisioner.createTopics();
+            kafkaTopicBootstrapper.createTopics();
 
             verify(adminClient).createTopics(any());
         }
@@ -93,7 +92,7 @@ class TopicProvisionerTest {
         void givenInterruptedException_thenSetsInterruptFlagAndDoesNotThrow() throws Exception {
             when(kafkaFuture.get(30, TimeUnit.SECONDS)).thenThrow(new InterruptedException("interrupted"));
 
-            topicProvisioner.createTopics();
+            kafkaTopicBootstrapper.createTopics();
 
             assertThat(Thread.currentThread().isInterrupted()).isTrue();
         }
@@ -102,7 +101,7 @@ class TopicProvisionerTest {
         void givenTimeoutException_thenLogsErrorAndDoesNotThrow() throws Exception {
             when(kafkaFuture.get(30, TimeUnit.SECONDS)).thenThrow(new TimeoutException("timed out"));
 
-            topicProvisioner.createTopics();
+            kafkaTopicBootstrapper.createTopics();
 
             verify(adminClient).createTopics(any());
         }
