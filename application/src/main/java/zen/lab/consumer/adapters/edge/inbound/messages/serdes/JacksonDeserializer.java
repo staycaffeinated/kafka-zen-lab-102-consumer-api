@@ -40,8 +40,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
         try {
             return jsonMapper.readValue(data, destinationClass);
         } catch (Exception e) {
-            throw new SerializationException(
-                    String.format("Failed to deserialize message from topic '%s'", topic), e);
+            throw new SerializationException(String.format("Failed to deserialize message from topic '%s'", topic), e);
         }
     }
 }
