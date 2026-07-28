@@ -1,0 +1,315 @@
+:toc: auto
+:toc-title: Contents
+:toclevels: 3
+
+= Contributing to kafka-zen-lab-102-consumer-api
+
+This guide covers everything needed to set up a local development environment,
+make changes, and submit them for review.
+
+== Prerequisites
+
+[cols="1,2"]
+|===
+|Tool |Requirement
+
+|Java
+|21 (version is declared in `.java-version` at the project root)
+
+|Gradle
+|8.13 or higher (use the included wrapper — `./gradlew` — to avoid version mismatches)
+
+|Docker
+|Required for Kafka (local broker) and optionally for SonarQube
+|===
+
+Install Java 21 with your preferred toolchain manager (e.g., SDKMAN, Homebrew, or Eclipse
+Adoptium). The Gradle Java toolchain reads `.java-version` automatically; no manual
+`JAVA_HOME` manipulation is needed.
+
+== Development Environment Setup
+
+=== 1. Clone the repository
+
+[source,shell]
+----
+git clone <repository-url>
+cd kafka-zen-lab-102-consumer-api
+----
+
+=== 2. Verify the Gradle wrapper
+
+If the wrapper JAR is absent, generate it once:
+
+[source,shell]
+----
+gradle wrapper
+----
+
+=== 3. Start a local Kafka broker
+
+The application connects to `localhost:9092` by default. Start a broker with Docker:
+
+[source,shell]
+----
+# Example using the Confluent Community Docker image
+docker run -d --name kafka \
+  -p 9092:9092 \
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+  confluentinc/cp-kafka:latest
+----
+
+Alternatively, use any Kafka broker accessible at `localhost:9092`, or override the address
+via the `spring.kafka.bootstrap-servers` environment variable.
+
+=== 4. Build the project
+
+[source,shell]
+----
+./gradlew build
+----
+
+This compiles, runs Spotless formatting enforcement, executes unit tests, executes integration
+tests, and collects JaCoCo coverage.
+
+== Build Commands Reference
+
+[cols="2,3"]
+|===
+|Command |Effect
+
+|`./gradlew build`
+|Compile, Spotless format, unit tests, integration tests, JaCoCo
+
+|`./gradlew test`
+|Unit tests only (includes ArchUnit rules)
+
+|`./gradlew integrationTest`
+|Integration tests only (`@SpringBootTest` against embedded context; Kafka auto-start disabled)
+
+|`./gradlew spotlessApply`
+|Auto-format all Java sources using Palantir Java Format
+
+|`./gradlew spotlessCheck`
+|Check formatting without modifying files (used in CI)
+
+|`./gradlew clean build sonar`
+|Full build with SonarQube analysis (requires `gradle.properties` credentials — see below)
+
+|`./gradlew jibDockerBuild`
+|Build a multi-platform OCI image and load it into the local Docker daemon
+
+|`./gradlew dependencyUpdates`
+|Report outdated dependency versions (Versions plugin)
+
+|`./gradlew test --tests zen.lab.consumer.ArchitectureTest`
+|Run only the ArchUnit architecture tests
+
+|`./gradlew jacocoTestReport`
+|Generate HTML/XML unit test coverage report
+
+|`./gradlew integrationTestCodeCoverageReport`
+|Generate HTML/XML integration test coverage report
+|===
+
+=== SonarQube configuration
+
+Set the following properties in `gradle.properties` (do not commit credentials):
+
+[source,properties]
+----
+systemProp.sonar.host.url=http://localhost:9000
+systemProp.sonar.token=<your-sonar-token>
+----
+
+Then run:
+
+[source,shell]
+----
+./gradlew clean build sonar
+----
+
+== Code Style
+
+Code style is enforced at build time by https://github.com/diffplug/spotless[Spotless] using
+the https://github.com/palantir/palantir-java-format[Palantir Java Format] formatter.
+
+Key rules enforced by Spotless:
+
+* Palantir Java Format indentation and brace style
+* Unused imports removed
+* Import ordering enforced
+* Tabs converted to 4 spaces
+* Trailing whitespace trimmed
+
+The `build` and `check` tasks depend on `spotlessApply`, so formatting is applied
+automatically on every build. You can also run it manually:
+
+[source,shell]
+----
+./gradlew spotlessApply
+----
+
+To check without modifying:
+
+[source,shell]
+----
+./gradlew spotlessCheck
+----
+
+Do not configure your IDE formatter to auto-format on save with conflicting rules. Instead,
+rely on `spotlessApply` before committing.
+
+== Architecture Rules (ArchUnit)
+
+Architecture constraints are verified at build time by
+https://www.archunit.org/[ArchUnit] in `ArchitectureTest`. Every `./gradlew build` run
+executes these tests. A violation will fail the build.
+
+The full rule table is in link:docs/architecture.adoc[docs/architecture.adoc].
+The following is a concise summary:
+
+[cols="1,2"]
+|===
+|Rule |What is enforced
+
+|Domain isolation
+|Classes in `domain` must not depend on `application`, `adapters`, or `infrastructure`
+
+|Application isolation
+|Classes in `application` must not depend on `adapters` or `infrastructure`
+
+|Adapter/infrastructure separation
+|`adapters` must not depend on `infrastructure`; `infrastructure` must not depend on `adapters`
+
+|Domain purity
+|Classes in `domain` must not import `org.springframework` or `jakarta.persistence`
+
+|Port contracts
+|All classes in `application.port.inbound` and `application.port.outbound` must be interfaces
+
+|Controller placement
+|`@RestController` classes must reside in `adapters..inbound` and end with `Controller`
+
+|Advice placement
+|`@ControllerAdvice` classes must reside in `infrastructure.advice`
+
+|Service placement
+|`@Service` classes must reside in `application.service`
+
+|Kafka listener placement
+|Methods annotated `@KafkaListener` must be declared in classes inside `adapters`
+
+|No field injection
+|`@Autowired` on fields is prohibited; use constructor injection
+
+|Configuration naming
+|`@Configuration` classes in `infrastructure.config` must end with `Configuration`
+
+|Exception naming
+|All `Exception` subclasses in the project must end with `Exception`
+|===
+
+When adding new classes, place them in the correct package and apply the correct naming
+convention to avoid failing these rules.
+
+== Adding a New Event Type
+
+Follow these five steps when the upstream traffic simulator introduces a new `eventType` value:
+
+1. *Add the message DTO.* Create a concrete `final` subclass of `ClickEventMessage` in
+   `adapters.edge.inbound.messages.model`. Annotate it with `@JsonSubTypes.Type` on the
+   `ClickEventMessage` base class, mapping the new `eventType` string to the new class.
+
+2. *Add the domain event.* Create a new Java record implementing `ClickEvent` in
+   `domain.events`. Add it to the `permits` clause of the `ClickEvent` sealed interface.
+
+3. *Update the mapper.* Add a new `case` branch to the `switch` in
+   `ClickEventMessageMapper.toDomain()`. The sealed-interface exhaustive switch will produce
+   a compile error if you omit this step.
+
+4. *Handle the event in the service.* Update `ClickEventProcessingService.process()` or
+   dispatch to a new use case as required.
+
+5. *Write tests.* Add unit tests for the new DTO, the new domain record, and the new mapper
+   branch. Add an integration test if the end-to-end flow requires broker interaction.
+
+== Replacing `InMemoryClickEventStore`
+
+`InMemoryClickEventStore` is a development stub that logs and discards events. To persist
+events to a real backend:
+
+1. Implement `ClickEventStore` in a new class under `adapters.edge.outbound.persistence`
+   (or a dedicated persistence sub-package).
+2. Annotate the implementation with `@Component` (or register it in a `@Configuration` class).
+3. Remove or qualify the stub bean with `@ConditionalOn*` or a Spring Profile to avoid
+   ambiguity when both beans are on the classpath.
+4. Add integration tests covering the new implementation.
+
+== Testing Requirements
+
+=== Test types
+
+[cols="1,3"]
+|===
+|Type |Requirements
+
+|Unit tests (`src/test/java`)
+|Must not load a Spring context. Use Mockito for dependencies.
+Architecture tests (`ArchitectureTest`) run as unit tests.
+
+|Integration tests (`src/integrationTest/java`)
+|Extend `AbstractIntegrationTest`, which activates the `test` and `integration-test` profiles.
+Kafka listener auto-startup is disabled (`spring.kafka.listener.auto-startup=false`).
+Use `@SpringBootTest(webEnvironment = RANDOM_PORT)`.
+|===
+
+=== Coverage
+
+JaCoCo collects coverage from both test suites and reports are aggregated at the root project
+level. SonarQube excludes configuration classes, exception classes, and the application entry
+point from coverage requirements (see `buildlogic.sonar-jacoco.gradle`).
+
+Aim for meaningful coverage of service, mapper, validator, and adapter classes. Do not write
+tests solely to hit a numeric threshold; prioritise tests that verify behaviour.
+
+=== Running tests
+
+[source,shell]
+----
+# All tests (unit + integration)
+./gradlew test integrationTest
+
+# Unit tests only
+./gradlew test
+
+# Integration tests only
+./gradlew integrationTest
+
+# Architecture tests only
+./gradlew test --tests zen.lab.consumer.ArchitectureTest
+----
+
+== Pull Request Process
+
+1. *Branch off `main`.* Use a short, descriptive branch name (e.g., `feat/add-cart-event`,
+   `fix/dlq-partition-selection`, `docs/update-contributing`).
+
+2. *Keep changes focused.* One logical change per PR makes review easier and reduces the
+   risk of merge conflicts.
+
+3. *Run the full build before pushing.* `./gradlew build` must pass cleanly, including
+   Spotless, ArchUnit, unit tests, and integration tests.
+
+4. *Write or update tests.* New behaviour must be covered. Changed behaviour must have
+   updated tests.
+
+5. *Update documentation.* If you change a Kafka topic name, REST endpoint, configuration
+   property, or architecture pattern, update `README.adoc` and/or
+   `docs/architecture.adoc` accordingly.
+
+6. *Open the PR against `main`.* Provide a clear description of the change, the motivation,
+   and any deployment or migration notes.
+
+7. *Address review comments.* Push fixup commits; do not force-push over a PR branch that
+   is under review.
