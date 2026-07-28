@@ -10,6 +10,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Inbound Kafka message DTO that carries the product snapshot embedded in a
+ * {@link ProductViewedEventMessage}.
+ *
+ * <p>Fields mirror those of the domain {@link zen.lab.consumer.domain.model.Product} record and
+ * are mapped 1-to-1 by {@code ClickEventMessageMapper.toProduct()}.
+ *
+ * <p>Jackson populates instances via field visibility ({@code @JsonAutoDetect}) so no
+ * explicit {@code @JsonProperty} annotations are required. The Sonar rule S107 (constructor has
+ * too many parameters) is suppressed because the field count is intrinsic to the domain model.
+ */
 @Getter
 @Builder
 @ToString

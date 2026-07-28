@@ -6,13 +6,18 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * This returns `Serde` instances, which have both the serializer and deserializer
- * for a given event.
- * <p></p>
- * I've seen several repositories that follow this pattern, so I've included it here.
- * The idea is that, while defining your topology, you can fetch the serdes you need
- * by calling, for example, `SerdesFactory.PurchaseEvent()` or `SerdesFactory.PaymentEvent()`.
+ * Factory that produces {@code Serde} instances (serialiser + deserialiser pairs)
+ * for use in Kafka Streams topology definitions.
  *
+ * <p>Callers request a {@code Serde} by invoking a named factory method, for example:
+ * <pre>{@code
+ * Serde<ClickEventMessage> serde = serdesFactory.clickEventMessage();
+ * }</pre>
+ *
+ * <p>Each method constructs a paired {@link JacksonSerializer} and
+ * {@link JacksonDeserializer} backed by the shared {@link JsonMapper} bean.
+ * No {@code Serde} methods are implemented yet; they are added here as new Kafka
+ * Streams topologies are introduced.
  */
 @Component
 @SuppressWarnings({
@@ -24,6 +29,13 @@ public class SerdesFactory {
 
     private final JsonMapper jsonMapper;
 
+    /**
+     * Creates a {@code SerdesFactory} backed by the given {@link JsonMapper}.
+     *
+     * @param jsonMapper the Jackson mapper used to build serialiser/deserialiser pairs;
+     *                   must not be null
+     * @throws NullPointerException if {@code jsonMapper} is null
+     */
     public SerdesFactory(@Nonnull JsonMapper jsonMapper) {
         this.jsonMapper = Objects.requireNonNull(jsonMapper, "The JsonMapper must not be null");
     }

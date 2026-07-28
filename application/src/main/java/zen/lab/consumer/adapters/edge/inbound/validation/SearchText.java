@@ -16,11 +16,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * This is a constraint for alphabet fields.
- * Besides using this annotation, alphabetic constraints
- * can be defined with, say: @Pattern(regexp = "[a-zA-Z ]").
- * The interface is chosen simply to illustrate how to
- * implement a constraint with an interface.
+ * Constraint that verifies a search-text parameter contains only safe characters and does not
+ * exceed the maximum permitted length.
+ *
+ * <p>An empty or {@code null} value passes validation unconditionally, making the annotation
+ * safe to use on optional query parameters. Non-empty values must not exceed
+ * {@code SearchTextValidator.MAXLENGTH} (currently 24) characters.
+ *
+ * <p>Consult the OWASP Validation Regex Repository and {@code SearchTextValidator} when
+ * tightening the character-set rules for a specific use case.
+ *
+ * @see SearchTextValidator
  */
 @Target({METHOD, FIELD, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)

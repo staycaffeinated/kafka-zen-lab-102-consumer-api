@@ -10,12 +10,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The default implementation of this controller returns Http:200 responses to GET requests.
+ * Minimal REST controller providing a root endpoint for liveness checks.
+ *
+ * <p>Returns HTTP 200 with an empty body for any {@code GET /} request, confirming that the
+ * Spring Web context is up. Dedicated liveness and readiness probes are available via Spring
+ * Boot Actuator at {@code /actuator/health/liveness} and {@code /actuator/health/readiness}.
  */
 @RestController
 @RequestMapping("/")
 public class RootController {
 
+    /**
+     * Liveness check endpoint.
+     *
+     * @return HTTP 200 with no body
+     */
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> getHome() {
         return ResponseEntity.ok().build();

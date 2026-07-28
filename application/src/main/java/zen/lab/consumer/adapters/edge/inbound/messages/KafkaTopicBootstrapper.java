@@ -20,10 +20,15 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
-/*
- * Creates standard topics on startup. Auto-creating topics is acceptable for local development.
- * Production environments should use Kubernetes, Terraform, or equivalent tooling.
- * Disabled in the test profile to prevent integration tests from connecting to Kafka.
+/**
+ * Creates standard Kafka topics on application startup for local development environments.
+ *
+ * <p>Topic auto-creation is acceptable for local development. Production environments
+ * should provision topics through Kubernetes, Terraform, or equivalent infrastructure tooling
+ * rather than relying on this bootstrapper.
+ *
+ * <p>This bean is excluded from the {@code test} profile (via {@code @Profile("!test")}) to
+ * prevent integration test suites from attempting a real broker connection.
  */
 @Configuration
 @EnableKafka
@@ -33,10 +38,25 @@ public class KafkaTopicBootstrapper {
 
     private final KafkaAdmin kafkaAdmin;
 
+    /**
+     * Creates a {@code KafkaTopicBootstrapper} backed by the given {@link KafkaAdmin}.
+     *
+     * @param kafkaAdmin the Spring Kafka admin client; autoconfigured from
+     *                   {@code spring.kafka.admin.*} properties
+     */
     public KafkaTopicBootstrapper(KafkaAdmin kafkaAdmin) {
         this.kafkaAdmin = kafkaAdmin;
     }
 
+    /**
+     * Creates all topics listed in {@link Schema#ALL_TOPICS} if they do not already exist.
+     *
+     * <p>Invoked once after the Spring application context has fully started
+     * ({@link ApplicationReadyEvent}). A {@code TopicExistsException} is treated as a
+     * no-op and logged at INFO level. Other failures are logged at ERROR level and do not
+     * prevent the application from starting, allowing the Kafka listener to start and retry
+     *  the connection independently.
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void createTopics() {
         try (AdminClient client = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
@@ -57,9 +77,11 @@ public class KafkaTopicBootstrapper {
         }
     }
 
-    /*
-     * The brokers' default number of partitions and replicas will be used
-     * if those values are not explicitly set here.
+    /**
+     * Builds a {@link NewTopic} descriptor using broker-default partition and replica counts.
+     *
+     * @param topicName the name of the topic to create
+     * @return a {@code NewTopic} suitable for submission to the Kafka admin client
      */
     private NewTopic createTopic(String topicName) {
         return TopicBuilder.name(topicName).build();

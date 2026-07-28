@@ -7,6 +7,21 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 import tools.jackson.databind.json.JsonMapper;
 
+/**
+ * Generic Kafka {@link Deserializer} that converts raw JSON bytes to objects using a
+ * provided {@link JsonMapper}.
+ *
+ * <p>A {@code null} byte array is treated as a {@code null} value (the Kafka convention
+ * for tombstone records). Any deserialisation failure wraps the underlying exception in a
+ * {@link org.apache.kafka.common.errors.SerializationException}.
+ *
+ * <p>The primary use-case is deserialising {@code ClickEventMessage} subtypes inside the
+ * Kafka consumer container. Pass a {@code JsonMapper} that has the Jackson modules required
+ * to handle the target type (e.g., {@code jackson-datatype-jsr310} for {@code Instant}
+ * fields).
+ *
+ * @param <T> the type of object to deserialise
+ */
 public class JacksonDeserializer<T> implements Deserializer<T> {
 
     private final Class<T> destinationClass;
@@ -31,6 +46,14 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
         this(destinationClass, new JsonMapper());
     }
 
+    /**
+     * Deserialises the given byte array into an instance of {@code T}.
+     *
+     * @param topic the Kafka topic name (used in error messages)
+     * @param data  the raw JSON bytes; may be null
+     * @return the deserialised object, or {@code null} if {@code data} is null
+     * @throws org.apache.kafka.common.errors.SerializationException if deserialisation fails
+     */
     @Override
     @Nullable
     public T deserialize(String topic, byte[] data) {
