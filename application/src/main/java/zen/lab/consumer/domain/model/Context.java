@@ -1,5 +1,7 @@
 package zen.lab.consumer.domain.model;
 
+import java.util.Objects;
+
 /**
  * Immutable value object that captures the page context at the moment a click-stream
  * event was produced.
@@ -26,6 +28,11 @@ package zen.lab.consumer.domain.model;
  * @param searchQuery search term that led to this page; may be {@code null}
  */
 public record Context(String pageId, Long position, String source, String referrer, String searchQuery) {
+
+    public Context {
+        Objects.requireNonNull(pageId, "pageId must not be null");
+        Objects.requireNonNull(source, "source must not be null");
+    }
 
     public static Builder builder() {
         return new Builder();

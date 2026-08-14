@@ -2,6 +2,7 @@ package zen.lab.consumer.domain.model;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -54,6 +55,11 @@ public record Product(
         BigInteger ratingCount,
         Set<String> tags,
         String imageUrl) {
+
+    public Product {
+        Objects.requireNonNull(productId, "productId must not be null");
+        Objects.requireNonNull(name, "name must not be null");
+    }
 
     public static Builder builder() {
         return new Builder();

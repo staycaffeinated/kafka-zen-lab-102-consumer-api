@@ -3,6 +3,7 @@ package zen.lab.consumer.domain.events;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Domain event that records a user adding a product to their shopping cart.
@@ -45,6 +46,15 @@ public record ProductAddedToCartEvent(
         String productId,
         Map<String, Serializable> metadata)
         implements ClickEvent {
+
+    public ProductAddedToCartEvent {
+        Objects.requireNonNull(eventId, "eventId must not be null");
+        Objects.requireNonNull(eventType, "eventType must not be null");
+        Objects.requireNonNull(timestamp, "timestamp must not be null");
+        Objects.requireNonNull(userId, "userId must not be null");
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(productId, "productId must not be null");
+    }
 
     @Override
     public String toString() {

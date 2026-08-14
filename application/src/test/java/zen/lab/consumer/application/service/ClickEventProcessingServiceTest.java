@@ -11,8 +11,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.time.Instant;
 import zen.lab.consumer.application.port.outbound.ClickEventStore;
 import zen.lab.consumer.domain.events.ProductViewedEvent;
+import zen.lab.consumer.domain.model.Context;
+import zen.lab.consumer.domain.model.Product;
 
 @ExtendWith(MockitoExtension.class)
 class ClickEventProcessingServiceTest {
@@ -25,7 +28,17 @@ class ClickEventProcessingServiceTest {
 
     @Test
     void process_delegatesToStore() {
-        var event = new ProductViewedEvent("evt-1", null, null, null, null, null, null, null);
+        var product = Product.builder().productId("prod-1").name("Test Product").build();
+        var context = Context.builder().pageId("page-1").source("search").build();
+        var event = ProductViewedEvent.builder()
+                .eventId("evt-1")
+                .eventType("product.viewed")
+                .timestamp(Instant.EPOCH)
+                .userId("usr-1")
+                .sessionId("sess-1")
+                .product(product)
+                .context(context)
+                .build();
 
         service.process(event);
 
