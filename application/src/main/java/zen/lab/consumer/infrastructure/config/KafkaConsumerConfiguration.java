@@ -54,12 +54,12 @@ public class KafkaConsumerConfiguration {
         var handler = getDefaultErrorHandler(dlqProducerFactory);
         handler.addNotRetryableExceptions(
                 DeserializationException.class, SerializationException.class, IllegalArgumentException.class);
-        handler.setRetryListeners((record, ex, deliveryAttempt) -> log.warn(
+        handler.setRetryListeners((consumerRecord, ex, deliveryAttempt) -> log.warn(
                 "Retry attempt {} for topic={} partition={} offset={}",
                 deliveryAttempt,
-                record.topic(),
-                record.partition(),
-                record.offset(),
+                consumerRecord.topic(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
                 ex));
         return handler;
     }
