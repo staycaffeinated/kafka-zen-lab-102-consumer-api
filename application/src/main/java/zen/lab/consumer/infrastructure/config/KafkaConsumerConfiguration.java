@@ -22,7 +22,7 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
 import org.springframework.util.backoff.ExponentialBackOff;
-import zen.lab.consumer.adapters.edge.inbound.messages.Schema;
+import zen.lab.consumer.adapters.port.inbound.messages.Schema;
 
 /**
  * Kafka consumer error handling. Base consumer settings auto-configured from

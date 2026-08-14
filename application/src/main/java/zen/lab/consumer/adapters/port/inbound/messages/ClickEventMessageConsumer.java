@@ -1,11 +1,10 @@
-package zen.lab.consumer.adapters.edge.inbound.messages;
+package zen.lab.consumer.adapters.port.inbound.messages;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import zen.lab.consumer.adapters.edge.inbound.messages.Schema;
 import zen.lab.consumer.adapters.port.inbound.messages.model.ClickEventMessage;
 import zen.lab.consumer.application.port.inbound.MessageConsumerUseCase;
 

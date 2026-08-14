@@ -69,7 +69,7 @@ spring:
       value-deserializer: "org.springframework.kafka.support.serializer.JsonDeserializer"
       properties:
         spring.json.trusted.packages: "zen.lab.*"
-        spring.json.value.default.type: "zen.lab.consumer.adapters.edge.inbound.messages.model.ClickEventMessage"
+        spring.json.value.default.type: "zen.lab.consumer.adapters.port.inbound.messages.model.ClickEventMessage"
     listener:
       ack-mode: MANUAL_IMMEDIATE
       client-id: "${spring.application.name}"
