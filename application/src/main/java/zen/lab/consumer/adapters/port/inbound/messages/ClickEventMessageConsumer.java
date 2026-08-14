@@ -1,10 +1,11 @@
-package zen.lab.consumer.adapters.port.inbound.messages;
+package zen.lab.consumer.adapters.edge.inbound.messages;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import zen.lab.consumer.adapters.edge.inbound.messages.Schema;
 import zen.lab.consumer.adapters.port.inbound.messages.model.ClickEventMessage;
 import zen.lab.consumer.application.port.inbound.MessageConsumerUseCase;
 
@@ -29,7 +30,7 @@ import zen.lab.consumer.application.port.inbound.MessageConsumerUseCase;
 public class ClickEventMessageConsumer {
 
     private final MessageConsumerUseCase messageConsumerUseCase;
-    private final ClickEventMessageMapper clickEventMessageMapper;
+    private final zen.lab.consumer.adapters.port.inbound.messages.ClickEventMessageMapper clickEventMessageMapper;
 
     /**
      * Receives a message from the click-event topic, maps it to a domain event,

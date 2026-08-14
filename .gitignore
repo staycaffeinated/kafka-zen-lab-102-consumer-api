@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,gradle,java,kotlin
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,gradle,java,kotlin
 
+# macOS
+.DS_Store
+
 # Metacode stuff
 metacode.properties
 
