@@ -12,7 +12,6 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -34,18 +33,7 @@ import zen.lab.consumer.adapters.port.inbound.messages.Schema;
 public class KafkaConsumerConfiguration {
 
     private final Environment environment;
-
-    @Value("${spring.kafka.listener.backoff.initial-interval:1000}")
-    private long initialInterval;
-
-    @Value("${spring.kafka.listener.backoff.multiplier:2.0}")
-    private double multiplier;
-
-    @Value("${spring.kafka.listener.backoff.max-interval:30000}")
-    private long maxInterval;
-
-    @Value("${spring.kafka.listener.backoff.max-elapsed-time:32000}")
-    private long maxElapsedTime;
+    private final KafkaBackoffProperties backoffProperties;
 
     /**
      * Routes failed messages to the DLQ after up to 5 retries with exponential backoff.
@@ -83,10 +71,10 @@ public class KafkaConsumerConfiguration {
                 kafkaTemplate, (consumerRecord, ex) -> new TopicPartition(Schema.Topics.CLICK_EVENT_DLQ, -1));
 
         var backOff = new ExponentialBackOff();
-        backOff.setInitialInterval(initialInterval);
-        backOff.setMultiplier(multiplier);
-        backOff.setMaxInterval(maxInterval);
-        backOff.setMaxElapsedTime(maxElapsedTime);
+        backOff.setInitialInterval(backoffProperties.initialInterval());
+        backOff.setMultiplier(backoffProperties.multiplier());
+        backOff.setMaxInterval(backoffProperties.maxInterval());
+        backOff.setMaxElapsedTime(backoffProperties.maxElapsedTime());
 
         return new DefaultErrorHandler(recoverer, backOff);
     }
