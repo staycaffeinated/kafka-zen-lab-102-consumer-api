@@ -1,7 +1,6 @@
 package zen.lab.consumer.domain.events;
 
 import java.time.Instant;
-import java.util.Objects;
 import org.jspecify.annotations.NonNull;
 import zen.lab.consumer.domain.model.Context;
 import zen.lab.consumer.domain.model.Product;
@@ -46,16 +45,6 @@ public record ProductViewedEvent(
         Product product,
         Context context)
         implements ClickEvent {
-
-    public ProductViewedEvent {
-        Objects.requireNonNull(eventId, "eventId must not be null");
-        Objects.requireNonNull(eventType, "eventType must not be null");
-        Objects.requireNonNull(timestamp, "timestamp must not be null");
-        Objects.requireNonNull(userId, "userId must not be null");
-        Objects.requireNonNull(sessionId, "sessionId must not be null");
-        Objects.requireNonNull(product, "product must not be null");
-        Objects.requireNonNull(context, "context must not be null");
-    }
 
     @Override
     @NonNull

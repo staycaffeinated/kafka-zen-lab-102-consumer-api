@@ -6,12 +6,12 @@ package zen.lab.consumer.application.service;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.time.Instant;
 import zen.lab.consumer.application.port.outbound.ClickEventStore;
 import zen.lab.consumer.domain.events.ProductViewedEvent;
 import zen.lab.consumer.domain.model.Context;

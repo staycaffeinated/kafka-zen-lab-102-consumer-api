@@ -14,5 +14,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @param maxElapsedTime  total elapsed time before the recoverer is invoked in milliseconds
  */
 @ConfigurationProperties(prefix = "spring.kafka.listener.backoff")
-public record KafkaBackoffProperties(
-        long initialInterval, double multiplier, long maxInterval, long maxElapsedTime) {}
+public record KafkaBackoffProperties(long initialInterval, double multiplier, long maxInterval, long maxElapsedTime) {}
