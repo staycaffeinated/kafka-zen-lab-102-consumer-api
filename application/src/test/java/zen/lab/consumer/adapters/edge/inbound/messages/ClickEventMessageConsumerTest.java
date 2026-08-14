@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages;
+package zen.lab.consumer.adapters.port.inbound.messages;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ClickEventMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductViewedEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ClickEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductViewedEventMessage;
 import zen.lab.consumer.application.port.inbound.MessageConsumerUseCase;
 import zen.lab.consumer.domain.events.ProductViewedEvent;
 

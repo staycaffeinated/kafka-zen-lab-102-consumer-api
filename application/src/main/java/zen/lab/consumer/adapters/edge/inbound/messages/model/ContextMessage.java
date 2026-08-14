@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages.model;
+package zen.lab.consumer.adapters.port.inbound.messages.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Builder;

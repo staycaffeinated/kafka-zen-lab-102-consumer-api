@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages.model;
+package zen.lab.consumer.adapters.port.inbound.messages.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,7 +1,7 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.adapters.edge.inbound.validation;
+package zen.lab.consumer.adapters.port.inbound.validation;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;

@@ -1,7 +1,7 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.adapters.edge.inbound.messages;
+package zen.lab.consumer.adapters.port.inbound.messages;
 
 /**
  * Central registry of Kafka topic names used by this application.

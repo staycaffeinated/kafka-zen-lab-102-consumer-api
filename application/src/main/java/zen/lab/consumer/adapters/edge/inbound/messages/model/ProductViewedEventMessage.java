@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages.model;
+package zen.lab.consumer.adapters.port.inbound.messages.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

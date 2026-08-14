@@ -1,11 +1,11 @@
-package zen.lab.consumer.adapters.edge.inbound.messages;
+package zen.lab.consumer.adapters.port.inbound.messages;
 
 import org.springframework.stereotype.Component;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ClickEventMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ContextMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductAddedToCartEventMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductViewedEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ClickEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ContextMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductAddedToCartEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductViewedEventMessage;
 import zen.lab.consumer.domain.events.ClickEvent;
 import zen.lab.consumer.domain.events.ProductAddedToCartEvent;
 import zen.lab.consumer.domain.events.ProductViewedEvent;

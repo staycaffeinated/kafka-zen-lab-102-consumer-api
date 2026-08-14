@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages.serdes;
+package zen.lab.consumer.adapters.port.inbound.messages.serdes;
 
 import jakarta.annotation.Nonnull;
 import java.util.Objects;

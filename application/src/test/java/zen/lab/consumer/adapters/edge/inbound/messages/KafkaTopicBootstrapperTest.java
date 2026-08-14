@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages;
+package zen.lab.consumer.adapters.port.inbound.messages;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

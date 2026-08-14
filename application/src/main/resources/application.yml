@@ -75,6 +75,11 @@ spring:
       client-id: "${spring.application.name}"
       concurrency: 5
       missing-topics-fatal: false
+      backoff:
+        initial-interval: 1000
+        multiplier: 2.0
+        max-interval: 30000
+        max-elapsed-time: 32000
 
 # -------------------------------------------------------------------------
 # Logging

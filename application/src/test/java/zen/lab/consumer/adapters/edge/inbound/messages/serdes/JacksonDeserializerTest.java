@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages.serdes;
+package zen.lab.consumer.adapters.port.inbound.messages.serdes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

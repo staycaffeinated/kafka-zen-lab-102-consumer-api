@@ -1,4 +1,4 @@
-package zen.lab.consumer.adapters.edge.inbound.messages;
+package zen.lab.consumer.adapters.port.inbound.messages;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ContextMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductAddedToCartEventMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductMessage;
-import zen.lab.consumer.adapters.edge.inbound.messages.model.ProductViewedEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ContextMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductAddedToCartEventMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductMessage;
+import zen.lab.consumer.adapters.port.inbound.messages.model.ProductViewedEventMessage;
 import zen.lab.consumer.domain.events.ProductAddedToCartEvent;
 import zen.lab.consumer.domain.events.ProductViewedEvent;
 

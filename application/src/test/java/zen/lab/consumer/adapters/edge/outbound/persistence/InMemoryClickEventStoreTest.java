@@ -1,7 +1,7 @@
 /*
  * Copyright 2026 [CopyrightOwner]
  */
-package zen.lab.consumer.adapters.edge.outbound.persistence;
+package zen.lab.consumer.adapters.port.outbound.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 

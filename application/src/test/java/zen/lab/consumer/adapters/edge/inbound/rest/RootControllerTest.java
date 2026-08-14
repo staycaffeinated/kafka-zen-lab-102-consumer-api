@@ -2,7 +2,7 @@
  * Copyright 2026 [CopyrightOwner]
  */
 
-package zen.lab.consumer.adapters.edge.inbound.rest;
+package zen.lab.consumer.adapters.port.inbound.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
