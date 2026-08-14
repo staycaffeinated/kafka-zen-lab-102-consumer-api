@@ -62,6 +62,9 @@ class ClickEventMessageMapperTest {
             ProductViewedEventMessage message = ProductViewedEventMessage.builder()
                     .eventId(EVENT_ID)
                     .eventType(EVENT_TYPE)
+                    .timestamp(TIMESTAMP)
+                    .userId(USER_ID)
+                    .sessionId(SESSION_ID)
                     .product(null)
                     .context(aContextMessage())
                     .build();
@@ -76,6 +79,9 @@ class ClickEventMessageMapperTest {
             ProductViewedEventMessage message = ProductViewedEventMessage.builder()
                     .eventId(EVENT_ID)
                     .eventType(EVENT_TYPE)
+                    .timestamp(TIMESTAMP)
+                    .userId(USER_ID)
+                    .sessionId(SESSION_ID)
                     .product(aProductMessage())
                     .context(null)
                     .build();
@@ -118,6 +124,9 @@ class ClickEventMessageMapperTest {
             ProductViewedEventMessage message = ProductViewedEventMessage.builder()
                     .eventId(EVENT_ID)
                     .eventType(EVENT_TYPE)
+                    .timestamp(TIMESTAMP)
+                    .userId(USER_ID)
+                    .sessionId(SESSION_ID)
                     .product(aProductMessage())
                     .context(null)
                     .build();
@@ -147,6 +156,9 @@ class ClickEventMessageMapperTest {
             ProductViewedEventMessage message = ProductViewedEventMessage.builder()
                     .eventId(EVENT_ID)
                     .eventType(EVENT_TYPE)
+                    .timestamp(TIMESTAMP)
+                    .userId(USER_ID)
+                    .sessionId(SESSION_ID)
                     .product(null)
                     .context(aContextMessage())
                     .build();
