@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class ClickEventMessageConsumerTest {
             .build();
 
     private static final ProductViewedEvent A_DOMAIN_EVENT = new ProductViewedEvent(
-            "evt-1", "product.viewed", java.time.Instant.EPOCH, "usr-1", "sess-1", null, null, null);
+            "evt-1", "product.viewed", Instant.EPOCH, "usr-1", "sess-1", null, null, null);
 
     private static ConsumerRecord<String, ClickEventMessage> aRecord(ClickEventMessage value) {
         return new ConsumerRecord<>(Schema.Topics.CLICK_EVENT_RECEIVED, 0, 0L, "key", value);
