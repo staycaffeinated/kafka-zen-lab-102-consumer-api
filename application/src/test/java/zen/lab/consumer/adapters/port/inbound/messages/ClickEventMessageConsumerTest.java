@@ -41,8 +41,8 @@ class ClickEventMessageConsumerTest {
             .eventType("product.viewed")
             .build();
 
-    private static final ProductViewedEvent A_DOMAIN_EVENT = new ProductViewedEvent(
-            "evt-1", "product.viewed", Instant.EPOCH, "usr-1", "sess-1", null, null, null);
+    private static final ProductViewedEvent A_DOMAIN_EVENT =
+            new ProductViewedEvent("evt-1", "product.viewed", Instant.EPOCH, "usr-1", "sess-1", null, null, null);
 
     private static ConsumerRecord<String, ClickEventMessage> aRecord(ClickEventMessage value) {
         return new ConsumerRecord<>(Schema.Topics.CLICK_EVENT_RECEIVED, 0, 0L, "key", value);
